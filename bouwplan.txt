@@ -1,0 +1,74 @@
+mainpage (index.php)
+	introductie
+	ladderlijst (open, max 10)
+	NOLOGIN: login knop
+	LOGIN: my ladders
+	LOGIN: mijn recente games
+
+ladders (ladders.php)
+	alle ladders
+	zoeken / bladeren
+
+
+
+
+
+ladderpagina (ladder.php?ladder=X)
+	top 10 spelers
+	recente games
+	LOGIN: jou ranking (5 spelers voor en na jou)
+	LOGIN: jou recente games
+
+ranking (ranking.php?ladder=X)
+	lijst van alle spelers op ranking
+	zoeken / bladeren
+	MOD: boot [met confirm]
+
+allegames (speler / ladder / ladderspeler) (games.php?player=X, games.php?ladder=X, games.php?ladder=X&player=X)
+	sproei alle games (multipage)
+	zoeken / bladeren
+
+ladderspeler (player.php?ladder=X&player=X)
+	ranking
+	recente games
+
+
+
+
+
+my ladders (myladders.php)
+	jou ladders met ranking
+
+my ladder settings (myladdersettings.php)
+	templates beheren
+	num games
+	actief ja/nee
+
+my games
+	-> allegames(speler)
+
+my settings (mysettings.php)
+	email
+	linkje naar ladder settings
+
+
+
+
+mod ladder (modladder.php?ladder=X)
+	invite knop
+	invitation lijst [top10]
+	accept lijst [top10]
+	start knop [met confirm]
+	stop knop [met confirm]
+	settings
+		templates
+		naam
+		omschijving
+		min/max games
+		invitation type
+		admin lijst
+
+mod ladder invitelist (modinvites.php?ladder=X)
+mod ladder join requestlist (modjoinrequests.php?ladder=X)
+
+
