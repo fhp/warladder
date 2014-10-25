@@ -48,7 +48,9 @@ function menu($activeItem)
 			array("name"=>"logout", "label"=>"Logout", "url"=>"logout.php"),
 		);
 	} else {
-		$menuRight = array();
+		$menuRight = array(
+			array("name"=>"login", "label"=>"Login", "url"=>$GLOBALS["config"]["loginUrl"]),
+		);
 	}
 	return renderMenu($menuLeft, $menuRight, $activeItem);
 }

@@ -13,7 +13,7 @@ $ladderDescriptionHtml = nl2br(htmlentities(db()->stdGet("ladders", array("ladde
 
 $html .= <<<HTML
 <div class="panel panel-default">
-  <div class="panel-heading">$ladderNameHtml</div>
+  <div class="panel-heading"><h1 class="panel-title">$ladderNameHtml</h1></div>
   <div class="panel-body">
     $ladderDescriptionHtml
   </div>
