@@ -35,6 +35,7 @@ class ListQuery
 
 function renderLongtable($title, $class, $header, $query, $render, $url, $pageSize, $page, $from, $count)
 {
+	// TODO: ondersteuning voor lege lijsten
 	$titleHtml = htmlentities($title);
 	
 	if ($page !== null) {
@@ -62,7 +63,9 @@ function renderLongtable($title, $class, $header, $query, $render, $url, $pageSi
 	$output .= "</table>\n";
 	if ($page === null) {
 		$urlHtml = htmlentities($url);
+		$output .= "<div class=\"panel-footer\">\n";
 		$output .= "<div class=\"show-all\"><a href=\"$urlHtml\" class=\"btn btn-default\">Show All</a></div>\n";
+		$output .= "</div>\n";
 	} else {
 		$count = db()->query($query)->numRows();
 		$pages = (int)(($count + $pageSize - 1) / $pageSize);
@@ -74,7 +77,7 @@ function renderLongtable($title, $class, $header, $query, $render, $url, $pageSi
 			} else {
 				$amp = "?";
 			}
-			
+			$output .= "<div class=\"text-center\">\n";
 			$output .= "<ul class=\"pagination\">\n";
 			if ($page == 1) {
 				$output .= "<li class=\"disabled\"><a href=\"$url{$amp}page=1\">&laquo;</a></li>\n";
@@ -109,6 +112,7 @@ function renderLongtable($title, $class, $header, $query, $render, $url, $pageSi
 			}
 			
 			$output .= "</ul>\n";
+			$output .= "</div>\n";
 		}
 	}
 	$output .= "</div>\n";

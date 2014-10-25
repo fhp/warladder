@@ -25,7 +25,7 @@ $recentGamesHtml = renderGames(null, $ladderID, "Recent games", 0, 10);
 
 if(isLoggedIn() && db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
 	$myRank = db()->stdGet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()), "rank");
-	$myRankingHtml = renderRanking($ladderID, "My rankings", currentUserID(), $myRank - 6, 11);
+	$myRankingHtml = renderRanking($ladderID, "My rankings", currentUserID(), max($myRank - 6, 0), 11);
 	$myRecentGamesHtml = renderGames(currentUserID(), $ladderID, "My recent games", 0, 10);
 	
 	$html .= <<<HTML
