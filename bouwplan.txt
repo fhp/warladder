@@ -16,8 +16,9 @@ ladders (ladders.php)
 ladderpagina (ladder.php?ladder=X)
 	top 10 spelers
 	recente games
-	LOGIN: jou ranking (5 spelers voor en na jou)
-	LOGIN: jou recente games
+	JOINED: jou ranking (5 spelers voor en na jou)
+	JOINED: jou recente games
+	LOGIN en NOT JOINED: join!
 
 ranking (ranking.php?ladder=X)
 	lijst van alle spelers op ranking

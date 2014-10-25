@@ -5,3 +5,7 @@ body {
 tr.highlight {
 	background: #FCF8E3;
 }
+
+.jumbotron {
+	margin-top: -20px;
+}

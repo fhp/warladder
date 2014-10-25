@@ -93,5 +93,3 @@ function renderMenuItems($items, $activeItem)
 	}
 	return $html;
 }
-
-?>

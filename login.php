@@ -20,5 +20,3 @@ if(!db()->stdExists("users", array("warlightUserID"=>$warlightUserID))) {
 $_SESSION["userID"] = db()->stdGet("users", array("warlightUserID"=>$warlightUserID), "userID");
 
 redirect("index.php");
-
-?>

@@ -31,5 +31,3 @@ $html .= <<<HTML
 HTML;
 
 page($html, "mysettings");
-
-?>

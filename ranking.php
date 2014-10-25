@@ -3,7 +3,8 @@
 require_once("common.php");
 
 if (!isset($_GET["ladder"])) error404();
-checkLadder($_GET["ladder"]);
+$ladderID = $_GET["ladder"];
+checkLadder($ladderID);
 
 if (isset($_GET["page"]) && ctype_digit($_GET["page"])) {
 	$page = $_GET["page"];
@@ -11,5 +12,7 @@ if (isset($_GET["page"]) && ctype_digit($_GET["page"])) {
 	$page = 1;
 }
 
-return page(renderRanking($_GET["ladder"], "Ranking for ladder #{$_GET["ladder"]}", null, null, null, $page), "ranking");
+$ladderNameHtml = htmlentities(db()->stdGet("ladders", array("ladderID"=>$ladderID), "name"));
+
+return page(renderRanking($ladderID, "Ranking for ladder $ladderNameHtml", null, null, null, $page), "ranking");
 

@@ -54,5 +54,3 @@ function checkLadder($ladderID)
 	
 	// TODO: check visibility and accessibility
 }
-
-?>
