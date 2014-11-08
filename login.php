@@ -13,7 +13,7 @@ if(!apiCheckLogin($_GET["token"], $_GET["clotpass"])) {
 $warlightUserID = $_GET["token"];
 
 if(!db()->stdExists("users", array("warlightUserID"=>$warlightUserID))) {
-	$user = apiGetUser($userID);
+	$user = apiGetUser($warlightUserID);
 	db()->stdNew("users", array("warlightUserID"=>$warlightUserID, "name"=>$user["name"], "color"=>$user["color"]));
 }
 
