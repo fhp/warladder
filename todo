@@ -1,0 +1,29 @@
+ranking (ranking.php?ladder=X)
+	MOD: boot [met confirm]
+
+my ladder settings (myladdersettings.php)
+	templates beheren
+	num games
+	actief ja/nee
+
+
+
+
+mod ladder (modladder.php?ladder=X)
+	invite knop
+	invitation lijst [top10]
+	accept lijst [top10]
+	start knop [met confirm]
+	stop knop [met confirm]
+	settings
+		templates
+		naam
+		omschijving
+		min/max games
+		invitation type
+		admin lijst
+
+mod ladder invitelist (modinvites.php?ladder=X)
+mod ladder join requestlist (modjoinrequests.php?ladder=X)
+
+
