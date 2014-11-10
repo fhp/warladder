@@ -3,6 +3,7 @@
 session_start();
 
 require_once("config.php");
+require_once("trueskill.php");
 require_once("ui.php");
 require_once("warlightapi.php");
 require_once("widgets.php");

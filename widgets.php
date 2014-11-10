@@ -185,7 +185,7 @@ function renderGames($userID, $ladderID, $title, $from, $count, $page = null)
 		. ($ladderID !== null ? ($userID !== null ? "AND" : "WHERE") . " ladderGames.ladderID = '$ladderIDSql' " : "")
 		. "ORDER BY gameID DESC ";
 	
-	$render = function($game) use($userID) {
+	$render = function($game) use($userID, $ladderID) {
 		$gameNameHtml = htmlentities($game["gameName"]);
 		$ladderNameHtml = htmlentities($game["ladderName"]);
 		if(isset($game["winningUserName"])) {
@@ -205,8 +205,8 @@ function renderGames($userID, $ladderID, $title, $from, $count, $page = null)
 		}
 		return "<tr class=\"$class\">"
 			. "<td><a href=\"http://WarLight.net/MultiPlayer?GameID={$game["warlightGameID"]}\">$gameNameHtml</a></td>"
-			. "<td><a href=\"ladder.php?ladderID={$game["ladderID"]}\">$ladderNameHtml</a></td>"
-			. "<td>" . (isset($game["winningUserName"]) ? "<a href=\"player.php?ladderID={$game["ladderID"]}&playerID={$game["winningUserID"]}\">" : "") . $winningUserName . (isset($game["winningUserName"]) ? "</a>" : "") . "</td>"
+			. "<td><a href=\"ladder.php?ladderID={$ladderID}\">$ladderNameHtml</a></td>"
+			. "<td>" . (isset($game["winningUserName"]) ? "<a href=\"player.php?ladderID={$ladderID}&playerID={$game["winningUserID"]}\">" : "") . $winningUserName . (isset($game["winningUserName"]) ? "</a>" : "") . "</td>"
 			. "</tr>\n";
 	};
 	
