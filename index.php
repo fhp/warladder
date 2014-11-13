@@ -31,12 +31,10 @@ $html .= <<<HTML
 
 HTML;
 
-// $rankingHtml = renderRanking(1, "rankings", 4, 0, 10, null, "ranking ");
-
 $openLaddersHtml = renderOpenLadders("Open ladders", 0, 10);
 
 if(isLoggedIn()) {
-	$myLaddersHtml = renderMyLadders(currentUserID(), "My ladders", 0, 5);
+	$myLaddersHtml = renderMyLadders(currentUserID(), "Your ladders", 0, 5);
 	$myGamesHtml = renderGames(currentUserID(), null, "Recent games", 0, 5);
 	$html .= <<<HTML
 <div class="container">

@@ -2,14 +2,10 @@
 
 require_once("common.php");
 
-if (!isset($_GET["ladder"])) error404();
-if (!isset($_GET["player"])) error404();
-$ladderID = $_GET["ladder"];
-$userID = $_GET["player"];
-checkLadder($ladderID);
-if(!db()->stdExists("ladderPlayers", array("userID"=>$userID, "ladderID"=>$ladderID))) {
-	error404();
-}
+$ladderID = get("ladder");
+$userID = get("player");
+
+checkLadderPlayer($ladderID, $userID);
 
 $html = "";
 
@@ -17,7 +13,7 @@ $playerNameHtml = htmlentities(db()->stdGet("users", array("userID"=>$userID), "
 $ladderNameHtml = htmlentities(db()->stdGet("ladders", array("ladderID"=>$ladderID), "name"));
 
 $playerRank = db()->stdGet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), "rank");
-$rankingHtml = renderRanking($ladderID, "Ranking", $userID, max($playerRank - 6, 0), 11);
+$rankingHtml = renderRanking($ladderID, "$playerNameHtml's rank", "There don't seem to be any players on this ladder.", $userID, max($playerRank - 6, 0), 10);
 $recentGamesHtml = renderGames($userID, $ladderID, "Recent games", 0, 10);
 
 $html .= <<<HTML

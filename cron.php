@@ -13,8 +13,8 @@ function demoApiGetGame($warlightGameID)
 	if (count($players) != 2) {
 		die("VERKEERDE HOEVEELHEID SPELERS IN GAME\n");
 	}
-	$userID1 = $players[0];
-	$userID2 = $players[1];
+	$userID1 = db()->stdGet("users", array("userID"=>$players[0]), "warlightUserID");
+	$userID2 = db()->stdGet("users", array("userID"=>$players[1]), "warlightUserID");
 	
 	if ($userID1 > $userID2) {
 		$higher = $userID1;
@@ -123,7 +123,7 @@ function createGame($ladderID, $userID1, $userID2)
 	$scores = array();
 	foreach($templates as $templateID) {
 		$user1Score = (isset($user1TemplateScores[$templateID]) ? $user1TemplateScores[$templateID] : 1);
-		$user2Score = (isset($user2TemplateScores[$templateID]) ? $user1TemplateScores[$templateID] : 1);
+		$user2Score = (isset($user2TemplateScores[$templateID]) ? $user2TemplateScores[$templateID] : 1);
 		$scores[$templateID] = $user1Score + $user2Score;
 	}
 	
@@ -505,6 +505,9 @@ function createGames($ladderID)
 		});
 	}
 }
+
+// TODO: lock
+// TODO: playerdata updaten
 
 finishGames(1);
 createGames(1);

@@ -2,26 +2,23 @@
 
 require_once("common.php");
 
-if(isset($_GET["ladder"]) && isset($_GET["player"])) {
-	$ladderID = $_GET["ladder"];
-	$userID = $_GET["player"];
+$ladderID = get("ladder");
+$userID = get("player");
+
+if ($ladderID !== null && $userID !== null) {
 	checkLadder($ladderID);
 	
 	$title = "Recent games on " . db()->stdGet("ladders", array("ladderID"=>$ladderID), "name") . " played by " . db()->stdGet("users", array("userID"=>$userID), "name");
 	$pageType = "ladderplayergames";
-} else if(isset($_GET["player"])) {
+} else if($userID !== null) {
 	requireLogin();
-	if(currentUserID() != $_GET["player"]) {
+	if(currentUserID() != $userID) {
 		error404();
 	}
-	$ladderID = null;
-	$userID = $_GET["player"];
 	
 	$title = "My recent games";
 	$pageType = "mygames";
-} else if(isset($_GET["ladder"])) {
-	$ladderID = $_GET["ladder"];
-	$userID = null;
+} else if($ladderID !== null) {
 	checkLadder($ladderID);
 	
 	$title = "Recent games on " . db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
@@ -30,10 +27,4 @@ if(isset($_GET["ladder"]) && isset($_GET["player"])) {
 	error404();
 }
 
-if (isset($_GET["page"]) && ctype_digit($_GET["page"])) {
-	$page = $_GET["page"];
-} else {
-	$page = 1;
-}
-
-return page(renderGames($userID, $ladderID, $title, null, null, $page), $pageType);
+return page(renderGames($userID, $ladderID, $title, null, null, pageNumber()), $pageType);

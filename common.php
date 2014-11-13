@@ -17,6 +17,32 @@ function db()
 	return $GLOBALS["database"];
 }
 
+function get($key)
+{
+	if (isset($_GET[$key])) {
+		return $_GET[$key];
+	}
+	return null;
+}
+
+function post($key)
+{
+	if (isset($_POST[$key])) {
+		return $_POST[$key];
+	}
+	return null;
+}
+
+function pageNumber()
+{
+	$page = get("page");
+	if ($page !== null && ctype_digit($page)) {
+		return $page;
+	} else {
+		return 1;
+	}
+}
+
 function redirect($url)
 {
 	header("location: $url");
@@ -51,7 +77,41 @@ function error404()
 
 function checkLadder($ladderID)
 {
-	if (!db()->stdExists("ladders", array("ladderID"=>$ladderID))) error404();
+	$settings = db()->stdGetTry("ladders", array("ladderID"=>$ladderID), array("accessibility", "visibility"));
+	if ($settings === null) error404();
 	
-	// TODO: check visibility and accessibility
+	if ($settings["visibility"] == "PUBLIC") {
+		return;
+	}
+	
+	if ($settings["accessibility"] == "PUBLIC" || $settings["accessibility"] == "MODERATED") {
+		return;
+	}
+	
+	$userID = currentUserID();
+	if ($userID === null) {
+		error404();
+	}
+	
+	if (db()->stdExists("ladderAdmins", array("ladderID"=>$ladderID, "userID"=>$userID))) {
+		return;
+	}
+	
+	$status = db()->stdGetTry("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), "joinStatus");
+	if ($status === null) {
+		error404();
+	}
+	if ($status == "BOOTED") {
+		error404();
+	}
+	
+	return;
+}
+
+function checkLadderPlayer($ladderID, $userID)
+{
+	checkLadder($ladderID);
+	if(!db()->stdExists("ladderPlayers", array("userID"=>$userID, "ladderID"=>$ladderID))) {
+		error404();
+	}
 }

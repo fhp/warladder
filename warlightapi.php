@@ -52,6 +52,9 @@ function apiPost($url, $get = null, $post = null, $addAuth = true)
 
 function apiCheckLogin($warlightUserID, $clotPassword)
 {
+	if ($warlightUserID === null || $clotPassword === null) {
+		return false;
+	}
 	$json = apiPost("http://warlight.net/API/ValidateInviteToken", array("Token"=>$warlightUserID));
 	$response = json_decode($json);
 	if ($response === null) {

@@ -31,7 +31,6 @@ function pipeExec($command, $stdin)
 
 function tsDefaultScore()
 {
-	// TODO: compute rating
 	return array("mu"=>1000.0, "sigma"=>(1000.0/3.0), "rating"=>0.0);
 }
 

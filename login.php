@@ -2,15 +2,11 @@
 
 require_once("common.php");
 
-if(!isset($_GET["token"]) || !isset($_GET["clotpass"])) {
+if(!apiCheckLogin(get("token"), get("clotpass"))) {
 	redirect("index.php");
 }
 
-if(!apiCheckLogin($_GET["token"], $_GET["clotpass"])) {
-	redirect("index.php");
-}
-
-$warlightUserID = $_GET["token"];
+$warlightUserID = get("token");
 
 if(!db()->stdExists("users", array("warlightUserID"=>$warlightUserID))) {
 	$user = apiGetUser($warlightUserID);
