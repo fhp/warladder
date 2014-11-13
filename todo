@@ -17,13 +17,27 @@ mod ladder (modladder.php?ladder=X)
 	stop knop [met confirm]
 	settings
 		templates
-		naam
-		omschijving
-		min/max games
-		invitation type
 		admin lijst
 
 mod ladder invitelist (modinvites.php?ladder=X)
 mod ladder join requestlist (modjoinrequests.php?ladder=X)
 
 
+Teksten aanpassen
+
+TODO's in code fixen
+
+Opschonen UI
+
+Meer vulling
+
+Ladder joinen => settings doorgeven!
+
+Live testen
+
+Email notificaties:
+	mod: nieuwe mensen
+	ladder status (maandelijks)
+	confirm email
+
+Chat per ladder

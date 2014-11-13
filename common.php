@@ -4,6 +4,7 @@ session_start();
 
 require_once("config.php");
 require_once("trueskill.php");
+require_once("libui.php");
 require_once("ui.php");
 require_once("warlightapi.php");
 require_once("widgets.php");
@@ -114,4 +115,20 @@ function checkLadderPlayer($ladderID, $userID)
 	if(!db()->stdExists("ladderPlayers", array("userID"=>$userID, "ladderID"=>$ladderID))) {
 		error404();
 	}
+}
+
+function checkLadderMod($ladderID)
+{
+	checkLadder($ladderID);
+	if (!isMod($ladderID)) error404();
+}
+
+function isMod($ladderID, $userID = null) {
+	if($userID === null) {
+		$userID = currentUserID();
+	}
+	if($userID === null) {
+		return false;
+	}
+	return db()->stdExists("ladderAdmins", array("ladderID"=>$ladderID, "userID"=>$userID));
 }
