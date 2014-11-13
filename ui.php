@@ -9,10 +9,10 @@ function rawPage($pageHtml, $activeItem)
 <html lang="en">
 <head>
 	<title>Warladder</title>
-	<link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+	<link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="style.css">
-	<script src="bootstrap/js/jquery-2.1.1.min.js"></script>
-	<script src="bootstrap/js/bootstrap.min.js"></script>
+	<script src="assets/js/jquery-2.1.1.min.js"></script>
+	<script src="assets/js/bootstrap.min.js"></script>
 </head>
 <body>
 	$menu
