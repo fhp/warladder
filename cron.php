@@ -113,6 +113,15 @@ function finishGames($ladderID)
 
 
 
+function describeRank($rank)
+{
+	switch ($rank) {
+		case 1: return "1st";
+		case 2: return "2nd";
+		case 3: return "3rd";
+		default: return "{$rank}th";
+	}
+}
 
 function createGame($ladderID, $userID1, $userID2)
 {
@@ -130,6 +139,7 @@ function createGame($ladderID, $userID1, $userID2)
 	arsort($scores);
 	reset($scores);
 	list($templateID, $score) = each($scores);
+	$templateName = db()->stdGet("templates", array("ladderID"=>$ladderID), "name");
 	
 	db()->startTransaction();
 	$gameID = db()->stdNew("ladderGames", array("ladderID"=>$ladderID, "templateID"=>$templateID, "warlightGameID"=>null, "name"=>null, "status"=>"RUNNING", "winningUserID"=>null, "startTime"=>time(), "endTime"=>null));
@@ -137,10 +147,20 @@ function createGame($ladderID, $userID1, $userID2)
 	db()->stdNew("gamePlayers", array("gameID"=>$gameID, "userID"=>$userID2));
 	
 	$ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
-	$user1Name = db()->stdGet("users", array("userID"=>$userID1), "name");
-	$user2Name = db()->stdGet("users", array("userID"=>$userID2), "name");
-	$name = "$ladderName game #$gameID: $user1Name vs $user2Name";
-	$description = "Have fun!"; // TODO: fill in something useful
+	$user1 = db()->stdGet("users", array("userID"=>$userID1), array("name", "rating", "rank"));
+	$user2 = db()->stdGet("users", array("userID"=>$userID2), array("name", "rating", "rank"));
+	$rank1 = describeRank($user1["rank"]);
+	$rank2 = describeRank($user2["rank"]);
+	
+	$name = "$ladderName game #$gameID: {$user1["name"]} vs {$user2["name"]}";
+	
+	$description = <<<DESC
+This game is part of ladder $ladderName. To see up-to-date ladder ratings, visit the ladder page at {$GLOBALS["config"]["baseUrl"]}/ladder.php?ladder=$ladderID
+Contender 1: {$user1["name"]} (Ranked $rank1 with a rating of {$user1["rating"]})
+Contender 2: {$user2["name"]} (Ranked $rank2 with a rating of {$user2["rating"]})
+
+Settings: $templateName
+DESC;
 	
 	$warlightGameID = demoApiCreateGame($templateID, $name, $description, array($userID1=>1, $userID2=>2));
 	if ($warlightGameID === null) {
@@ -470,7 +490,9 @@ function createGames($ladderID)
 		/*
 		 * Create a game.
 		 */
-		$success = createGame($ladderID, $userID, $userID2);
+		$gamePlayers = array($userID, $userID2);
+		array_shuffle($gamePlayers);
+		$success = createGame($ladderID, $gamePlayers[0], $gamePlayers[1]);
 		if (!$success) {
 			// Blacklist this combination.
 			$interveningGamesMatrix[$userID][$userID2] = false;
