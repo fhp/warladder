@@ -61,7 +61,6 @@ function demoApiCreateGame($templateID, $gameName, $personalMessage, $players)
 
 function finishGames($ladderID)
 {
-	db()->startTransaction();
 	$results = array();
 	
 	$runningGames = db()->stdList("ladderGames", array("ladderID"=>$ladderID, "status"=>"RUNNING"), array("gameID", "warlightGameID"));
@@ -105,8 +104,6 @@ function finishGames($ladderID)
 	foreach($newScores as $userID => $score) {
 		db()->stdSet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), $score);
 	}
-	
-	db()->commitTransaction();
 }
 
 
@@ -528,8 +525,16 @@ function createGames($ladderID)
 	}
 }
 
-// TODO: lock
 // TODO: playerdata updaten
 
-finishGames(1);
-createGames(1);
+db()->startTransaction();
+db()->stdLock("ladderPlayers", null);
+db()->stdLock("ladderGames", null);
+
+$ladders = db()->stdList("ladders", array("active"=>1), "ladderID");
+foreach($ladders as $ladderID) {
+	finishGames($ladderID);
+	createGames($ladderID);
+}
+
+db()->commitTransaction();
