@@ -121,15 +121,15 @@ function renderRanking($ladderID, $title, $emptyMessage, $highlightUserID, $from
 
 function renderOpenLadders($title, $from, $count, $page = null)
 {
-	$query = "SELECT ladderID, name, description "
+	$query = "SELECT ladderID, name, summary "
 		. "FROM ladders "
 		. "WHERE visibility = 'PUBLIC' AND active = '1' "
 		. "ORDER BY ladderID DESC ";
 	
 	$render = function($ladder) {
 		$nameHtml = htmlentities($ladder["name"]);
-		$descriptionHtml = htmlentities($ladder["description"]);
-		return "<tr><td><a href=\"ladder.php?ladder={$ladder["ladderID"]}\">$nameHtml</a></td><td>$descriptionHtml</td></tr>\n";
+		$summaryHtml = htmlentities($ladder["summary"]);
+		return "<tr><td><a href=\"ladder.php?ladder={$ladder["ladderID"]}\">$nameHtml</a></td><td>$summaryHtml</td></tr>\n";
 	};
 	
 	return renderLongtable($title, "There are currently no open ladders available.", "ladders open-ladders", array("Name", "Description"), $query, $render, "ladders.php", 50, $page, $from, $count);
@@ -138,16 +138,16 @@ function renderOpenLadders($title, $from, $count, $page = null)
 function renderMyLadders($userID, $title, $from, $count, $page = null)
 {
 	$userIDSql = db()->addSlashes($userID);
-	$query = "SELECT ladderID, name, description, rank "
+	$query = "SELECT ladderID, name, summary, rank "
 		. "FROM ladders INNER JOIN ladderPlayers USING(ladderID) "
 		. "WHERE ladderPlayers.userID = '$userIDSql' AND ladderPlayers.active = 1 AND ladders.active = 1 "
 		. "ORDER BY ladderID DESC ";
 	
 	$render = function($ladder) use($userID) {
 		$nameHtml = htmlentities($ladder["name"]);
-		$descriptionHtml = htmlentities($ladder["description"]);
+		$summaryHtml = htmlentities($ladder["summary"]);
 		$rankingUrlHtml = htmlentities("ranking.php?ladder={$ladder["ladderID"]}&player=$userID");
-		return "<tr><td><a href=\"ladder.php?ladder={$ladder["ladderID"]}\">$nameHtml</a></td><td>$descriptionHtml</td><td><a href=\"$rankingUrlHtml\">{$ladder["rank"]}</a></td></tr>\n";
+		return "<tr><td><a href=\"ladder.php?ladder={$ladder["ladderID"]}\">$nameHtml</a></td><td>$summaryHtml</td><td><a href=\"$rankingUrlHtml\">{$ladder["rank"]}</a></td></tr>\n";
 	};
 	
 	return renderLongtable($title, "You are not currently playing on any ladders.", "ladders my-ladders", array("Name", "Description", "Rank"), $query, $render, "myladders.php", 50, $page, $from, $count);

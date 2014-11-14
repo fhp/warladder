@@ -7,16 +7,18 @@ checkLadder($ladderID);
 
 $html = "";
 
-$ladderNameHtml = htmlentities(db()->stdGet("ladders", array("ladderID"=>$ladderID), "name"));
-$ladderDescriptionHtml = nl2br(htmlentities(db()->stdGet("ladders", array("ladderID"=>$ladderID), "description")));
+$ladder = db()->stdGet("ladders", array("ladderID"=>$ladderID), array("name", "summary", "message"));
+
+$ladderNameHtml = htmlentities($ladder["name"]);
+$ladderSummaryHtml = htmlentities($ladder["summary"]);
+$ladderMessageHtml = nl2br(htmlentities($ladder["message"]));
 
 $html .= <<<HTML
-<div class="panel panel-default">
-  <div class="panel-heading"><h1 class="panel-title">$ladderNameHtml</h1></div>
-  <div class="panel-body">
-    $ladderDescriptionHtml
-  </div>
+<div class="jumbotron">
+	<h1>$ladderNameHtml<br /><small>$ladderSummaryHtml</small></h1>
+	<p>$ladderMessageHtml</p>
 </div>
+
 HTML;
 
 $topRankingHtml = renderRanking($ladderID, "Top players", "There don't seem to be any players on this ladder.", null, 0, 10);
