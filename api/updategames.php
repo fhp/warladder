@@ -1,6 +1,6 @@
 <?php
 
-require_once("../common.php");
+require_once(dirname(__FILE__) . "/../common.php");
 
 // TODO: per speler berekenen op basis van maximum haalbare score
 define('ALWAYS_ACCEPTABLE_MATCH_QUALITY', 0.9);
@@ -137,7 +137,7 @@ function createGame($ladderID, $userID1, $userID2)
 	arsort($scores);
 	reset($scores);
 	list($templateID, $score) = each($scores);
-	$templateName = db()->stdGet("templates", array("ladderID"=>$ladderID), "name");
+	$templateName = db()->stdGet("templates", array("templateID"=>$templateID), "name");
 	
 	db()->startTransaction();
 	$gameID = db()->stdNew("ladderGames", array("ladderID"=>$ladderID, "templateID"=>$templateID, "warlightGameID"=>null, "name"=>null, "status"=>"RUNNING", "winningUserID"=>null, "startTime"=>time(), "endTime"=>null));
@@ -145,17 +145,19 @@ function createGame($ladderID, $userID1, $userID2)
 	db()->stdNew("gamePlayers", array("gameID"=>$gameID, "userID"=>$userID2));
 	
 	$ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
-	$user1 = db()->stdGet("users", array("userID"=>$userID1), array("name", "rating", "rank"));
-	$user2 = db()->stdGet("users", array("userID"=>$userID2), array("name", "rating", "rank"));
+	$userName1 = db()->stdGet("users", array("userID"=>$userID1), "name");
+	$userName2 = db()->stdGet("users", array("userID"=>$userID2), "name");
+	$user1 = db()->stdGet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID1), array("rating", "rank"));
+	$user2 = db()->stdGet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID2), array("rating", "rank"));
 	$rank1 = describeRank($user1["rank"]);
 	$rank2 = describeRank($user2["rank"]);
 	
-	$name = "$ladderName game #$gameID: {$user1["name"]} vs {$user2["name"]}";
+	$name = "$ladderName game #$gameID: $userName1 vs $userName2";
 	
 	$description = <<<DESC
 This game is part of ladder $ladderName. To see up-to-date ladder ratings, visit the ladder page at {$GLOBALS["config"]["baseUrl"]}/ladder.php?ladder=$ladderID
-Contender 1: {$user1["name"]} (Ranked $rank1 with a rating of {$user1["rating"]})
-Contender 2: {$user2["name"]} (Ranked $rank2 with a rating of {$user2["rating"]})
+Contender 1: $userName1 (Ranked $rank1 with a rating of {$user1["rating"]})
+Contender 2: $userName2 (Ranked $rank2 with a rating of {$user2["rating"]})
 
 Settings: $templateName
 DESC;
@@ -246,8 +248,8 @@ function createGames($ladderID)
 			INNER JOIN gamePlayers AS player2 ON player2.userID = player1.userID
 			INNER JOIN ladderGames AS game2 ON game2.gameID = player2.gameID
 			
-			WHERE game1.ladderID = 1
-			AND game2.ladderID = 1
+			WHERE game1.ladderID = '$ladderIDSql'
+			AND game2.ladderID = '$ladderIDSql'
 			AND game1.status = 'FINISHED'
 			AND game2.startTime <= game1.endTime
 			AND (game2.status = 'RUNNING' OR game2.endTime >= game1.endTime)
@@ -489,7 +491,7 @@ function createGames($ladderID)
 		 * Create a game.
 		 */
 		$gamePlayers = array($userID, $userID2);
-		array_shuffle($gamePlayers);
+		shuffle($gamePlayers);
 		$success = createGame($ladderID, $gamePlayers[0], $gamePlayers[1]);
 		if (!$success) {
 			// Blacklist this combination.

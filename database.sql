@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 14, 2014 at 09:12 PM
+-- Generation Time: Nov 15, 2014 at 12:52 AM
 -- Server version: 5.5.40
 -- PHP Version: 5.4.34-0+deb7u1
 
@@ -29,7 +29,8 @@ SET time_zone = "+00:00";
 CREATE TABLE IF NOT EXISTS `gamePlayers` (
   `gameID` int(11) NOT NULL,
   `userID` int(11) NOT NULL,
-  UNIQUE KEY `gameID` (`gameID`,`userID`)
+  UNIQUE KEY `gameID` (`gameID`,`userID`),
+  UNIQUE KEY `userID` (`userID`,`gameID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -41,7 +42,8 @@ CREATE TABLE IF NOT EXISTS `gamePlayers` (
 CREATE TABLE IF NOT EXISTS `ladderAdmins` (
   `ladderID` int(11) NOT NULL,
   `userID` int(11) NOT NULL,
-  PRIMARY KEY (`ladderID`,`userID`)
+  PRIMARY KEY (`ladderID`,`userID`),
+  UNIQUE KEY `userID` (`userID`,`ladderID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -61,9 +63,13 @@ CREATE TABLE IF NOT EXISTS `ladderGames` (
   `startTime` int(11) NOT NULL,
   `endTime` int(11) DEFAULT NULL,
   PRIMARY KEY (`gameID`),
+  UNIQUE KEY `warlightGameID` (`warlightGameID`),
   KEY `ladderID` (`ladderID`,`endTime`),
-  KEY `endTime` (`endTime`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=8315 ;
+  KEY `endTime` (`endTime`),
+  KEY `templateID` (`templateID`),
+  KEY `winningUserID` (`winningUserID`),
+  KEY `ladderID_2` (`ladderID`,`startTime`,`status`,`endTime`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10198 ;
 
 -- --------------------------------------------------------
 
@@ -82,7 +88,8 @@ CREATE TABLE IF NOT EXISTS `ladderPlayers` (
   `active` tinyint(1) NOT NULL,
   `simultaneousGames` int(11) NOT NULL,
   `joinTime` int(11) NOT NULL,
-  PRIMARY KEY (`userID`,`ladderID`)
+  PRIMARY KEY (`userID`,`ladderID`),
+  KEY `ladderID` (`ladderID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -113,7 +120,18 @@ CREATE TABLE IF NOT EXISTS `ladders` (
 CREATE TABLE IF NOT EXISTS `ladderTemplates` (
   `templateID` int(11) NOT NULL,
   `ladderID` int(11) NOT NULL,
-  PRIMARY KEY (`templateID`,`ladderID`)
+  PRIMARY KEY (`templateID`,`ladderID`),
+  UNIQUE KEY `ladderID` (`ladderID`,`templateID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `lock`
+--
+
+CREATE TABLE IF NOT EXISTS `lock` (
+  `dummy` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
@@ -157,7 +175,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`userID`),
   UNIQUE KEY `warlightUserID` (`warlightUserID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=102 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=103 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;

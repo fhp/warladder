@@ -17,7 +17,10 @@ players = {}
 for player in jsonInput["players"]:
 	if "id" not in player or "mu" not in player or "sigma" not in player:
 		sys.exit(1)
-	players[player["id"]] = env.create_rating(player["mu"], player["sigma"])
+	sigma = player["sigma"]
+	if sigma < 0.001:
+		sigma = 0.001
+	players[player["id"]] = env.create_rating(player["mu"], sigma)
 
 qualityList = []
 for id1 in players:
