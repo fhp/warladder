@@ -20,12 +20,12 @@ $html .= <<<HTML
 HTML;
 
 $topRankingHtml = renderRanking($ladderID, "Top players", "There don't seem to be any players on this ladder.", null, 0, 10);
-$recentGamesHtml = renderGames(null, $ladderID, "Recent games", 0, 10);
+$recentGamesHtml = renderGames(null, $ladderID, "Recent games", "No games have been played on this ladder yet.", 0, 10);
 
 if(isLoggedIn() && db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
 	$myRank = db()->stdGet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()), "rank");
 	$myRankingHtml = renderRanking($ladderID, "Your rank", "There don't seem to be any players on this ladder.", currentUserID(), max($myRank - 6, 0), 10);
-	$myRecentGamesHtml = renderGames(currentUserID(), $ladderID, "My recent games", 0, 10);
+	$myRecentGamesHtml = renderGames(currentUserID(), $ladderID, "Your recent games", "You have not played any games on this ladder yet.", 0, 10);
 	
 	$html .= <<<HTML
 <div class="row">

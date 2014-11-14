@@ -153,8 +153,11 @@ function renderMyLadders($userID, $title, $from, $count, $page = null)
 	return renderLongtable($title, "You are not currently playing on any ladders.", "ladders my-ladders", array("Name", "Description", "Rank"), $query, $render, "myladders.php", 50, $page, $from, $count);
 }
 
-function renderGames($userID, $ladderID, $title, $from, $count, $page = null)
+function renderGames($userID, $ladderID, $title, $emptyMessage, $from, $count, $page = null)
 {
+	$header = array();
+	$header[] = "Name";
+	
 	$userIDSql = db()->addSlashes($userID);
 	$ladderIDSql = db()->addSlashes($ladderID);
 	$select = "
@@ -166,28 +169,45 @@ function renderGames($userID, $ladderID, $title, $from, $count, $page = null)
 			ladders.ladderID as ladderID,
 			ladders.name AS ladderName,
 			winningUser.name AS winningUserName
+		";
+	$fromSql = "
 		FROM ladderGames
 			INNER JOIN ladders USING(ladderID)
 			LEFT JOIN users AS winningUser ON winningUser.userID = ladderGames.winningUserID
 		";
-	$where = "WHERE status = 'FINISHED' ";
-	if ($userID !== null) {
-		$select .= "INNER JOIN gamePlayers USING(gameID) ";
-		$where .= "AND gamePlayers.userID = '$userIDSql' ";
-	}
+	$where = "
+		WHERE status = 'FINISHED'
+		";
 	if ($ladderID !== null) {
 		$where .= "AND ladderGames.ladderID = '$ladderIDSql' ";
+	} else {
+		$header[] = "Ladder";
 	}
-	$query = $select . $where . " ORDER BY endTime DESC";
 	
-	$render = function($game) use($userID) {
+	if ($userID !== null) {
+		$select .= "
+			, opponent.userID AS opponentUserID
+			, opponent.name AS opponentName
+			";
+		$fromSql .= "
+			INNER JOIN gamePlayers AS playerYou USING(gameID)
+			INNER JOIN gamePlayers AS playerOpponent USING(gameID)
+			INNER JOIN users AS opponent ON playerOpponent.userID = opponent.userID
+			";
+		$where .= "
+			AND playerYou.userID = '$userIDSql'
+			AND opponent.userID <> '$userIDSql'
+			";
+		$header[] = "Opponent";
+	}
+	$query = $select . $fromSql . $where . " ORDER BY endTime DESC";
+	
+	$header[] = "Winner";
+	
+	$render = function($game) use($ladderID, $userID) {
 		$gameNameHtml = htmlentities($game["gameName"]);
 		$ladderNameHtml = htmlentities($game["ladderName"]);
-		if(isset($game["winningUserName"])) {
-			$winningUserName = htmlentities($game["winningUserName"]);
-		} else {
-			$winningUserName = "-";
-		}
+		
 		if ($userID === null) {
 			$class = "game-neutral";
 		} else if ($game["winningUserID"] === null) {
@@ -199,12 +219,25 @@ function renderGames($userID, $ladderID, $title, $from, $count, $page = null)
 		}
 		$class .= " game-finished";
 		// TODO: Reconstruct game name, add player links
-		return "<tr class=\"$class\">"
-			. "<td><a href=\"http://WarLight.net/MultiPlayer?GameID={$game["warlightGameID"]}\">$gameNameHtml</a></td>"
-			. "<td><a href=\"ladder.php?ladder={$game["ladderID"]}\">$ladderNameHtml</a></td>"
-			. "<td>" . (isset($game["winningUserName"]) ? "<a href=\"player.php?ladder={$game["ladderID"]}&player={$game["winningUserID"]}\">" : "") . $winningUserName . (isset($game["winningUserName"]) ? "</a>" : "") . "</td>"
-			. "</tr>\n";
+		
+		$output = "<tr class=\"$class\">";
+		$output .= "<td><a href=\"http://WarLight.net/MultiPlayer?GameID={$game["warlightGameID"]}\">$gameNameHtml</a></td>";
+		if ($ladderID === null) {
+			$output .= "<td><a href=\"ladder.php?ladder={$game["ladderID"]}\">$ladderNameHtml</a></td>";
+		}
+		if ($userID !== null) {
+			$opponentNameHtml = htmlentities($game["opponentName"]);
+			$output .= "<td><a href=\"player.php?ladder={$game["ladderID"]}&player={$game["opponentUserID"]}\">$opponentNameHtml</a></td>";
+		}
+		if ($game["winningUserName"] === null) {
+			$output .= "<td>-</td>";
+		} else {
+			$winnerNameHtml = htmlentities($game["winningUserName"]);
+			$output .= "<td><a href=\"player.php?ladder={$game["ladderID"]}&player={$game["winningUserID"]}\">$winnerNameHtml</a></td>";
+		}
+		$output .= "</tr>\n";
+		return $output;
 	};
 	
-	return renderLongtable($title, "", "games my-games", array("Name", "Ladder", "Winner"), $query, $render, "games.php?" . ($userID !== null ? "player=$userID" : "") . ($ladderID !== null ? ($userID !== null ? "&" : "") . "ladder=$ladderID" : ""), 50, $page, $from, $count);
+	return renderLongtable($title, $emptyMessage, "games my-games", $header, $query, $render, "games.php?" . ($userID !== null ? "player=$userID" : "") . ($ladderID !== null ? ($userID !== null ? "&" : "") . "ladder=$ladderID" : ""), 50, $page, $from, $count);
 }

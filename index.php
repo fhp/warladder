@@ -35,7 +35,7 @@ $openLaddersHtml = renderOpenLadders("Open ladders", 0, 10);
 
 if(isLoggedIn()) {
 	$myLaddersHtml = renderMyLadders(currentUserID(), "Your ladders", 0, 5);
-	$myGamesHtml = renderGames(currentUserID(), null, "Recent games", 0, 5);
+	$myGamesHtml = renderGames(currentUserID(), null, "Your recent games", "You have not played any ladder games yet.", 0, 5);
 	$html .= <<<HTML
 <div class="container">
 	<div class="row">

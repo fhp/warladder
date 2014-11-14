@@ -8,7 +8,17 @@ $userID = get("player");
 if ($ladderID !== null && $userID !== null) {
 	checkLadder($ladderID);
 	
-	$title = "Recent games on " . db()->stdGet("ladders", array("ladderID"=>$ladderID), "name") . " played by " . db()->stdGet("users", array("userID"=>$userID), "name");
+	$ladderNameHtml = htmlentities(db()->stdGet("ladders", array("ladderID"=>$ladderID), "name"));
+	if ($userID == currentUserID()) {
+		$title = "Your recent games on $ladderNameHtml";
+		$emptyMessage = "You have not played any games on $ladderNameHtml yet.";
+	} else {
+		$userNameHtml = htmlentities(db()->stdGet("users", array("userID"=>$userID), "name"));
+		
+		$title = "$userNameHtml's recent games on $ladderNameHtml";
+		$emptyMessage = "$userNameHtml has not played any games on $ladderNameHtml yet.";
+	}
+	
 	$pageType = "ladderplayergames";
 } else if($userID !== null) {
 	requireLogin();
@@ -16,15 +26,18 @@ if ($ladderID !== null && $userID !== null) {
 		error404();
 	}
 	
-	$title = "My recent games";
+	$title = "Your recent games";
+	$emptyMessage = "You have not played any ladder games yet.";
 	$pageType = "mygames";
 } else if($ladderID !== null) {
 	checkLadder($ladderID);
 	
-	$title = "Recent games on " . db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
+	$ladderNameHtml = htmlentities(db()->stdGet("ladders", array("ladderID"=>$ladderID), "name"));
+	$title = "Recent games on $ladderNameHtml";
+	$emptyMessage = "No games have been played on $ladderNameHtml yet.";
 	$pageType = "laddergames";
 } else {
 	error404();
 }
 
-return page(renderGames($userID, $ladderID, $title, null, null, pageNumber()), $pageType);
+return page(renderGames($userID, $ladderID, $title, $emptyMessage, null, null, pageNumber()), $pageType);

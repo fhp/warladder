@@ -21,7 +21,7 @@ if(!db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>curr
 	
 	db()->setQuery("UPDATE ladderPlayers SET rank = rank + 1 WHERE ladderID = '$ladderID' AND rank > $rank");
 	
-	// TODO: pas een game maken nadat settings zijn doorgegeven.
+	// TODO: pas een ladderPlayer maken nadat settings zijn doorgegeven.
 	db()->stdNew("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID(), "mu"=>$score["mu"], "sigma"=>$score["sigma"], "rating"=>$score["rating"], "rank"=>$rank + 1, "active"=>1, "simultaneousGames"=>5, "joinTime"=>time()));
 	db()->commitTransaction();
 }

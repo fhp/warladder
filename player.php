@@ -14,7 +14,7 @@ $ladderNameHtml = htmlentities(db()->stdGet("ladders", array("ladderID"=>$ladder
 
 $playerRank = db()->stdGet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), "rank");
 $rankingHtml = renderRanking($ladderID, "$playerNameHtml's rank", "There don't seem to be any players on this ladder.", $userID, max($playerRank - 6, 0), 10);
-$recentGamesHtml = renderGames($userID, $ladderID, "Recent games", 0, 10);
+$recentGamesHtml = renderGames($userID, $ladderID, "$playerNameHtml's recent games", "$playerNameHtml has not played any games on this ladder yet.", 0, 10);
 
 $html .= <<<HTML
 <div class="panel panel-default">
