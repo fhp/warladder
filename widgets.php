@@ -1,4 +1,4 @@
-// <?php
+<?php
 
 function renderLongtable($title, $emptyMessage, $class, $header, $query, $render, $url, $pageSize, $page, $from, $count)
 {
