@@ -1,7 +1,8 @@
 <?php
 
-require_once("common.php");
+require_once("../common.php");
 
+// TODO: per speler berekenen op basis van maximum haalbare score
 define('ALWAYS_ACCEPTABLE_MATCH_QUALITY', 0.9);
 define('ACCEPTABLE_MATCH_QUALITY_SLACK_PER_MISSING_GAME', 0.1);
 
@@ -524,8 +525,6 @@ function createGames($ladderID)
 		});
 	}
 }
-
-// TODO: playerdata updaten
 
 db()->startTransaction();
 db()->stdLock("ladderPlayers", null);
