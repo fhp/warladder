@@ -1,4 +1,4 @@
-<?php
+// <?php
 
 function renderLongtable($title, $emptyMessage, $class, $header, $query, $render, $url, $pageSize, $page, $from, $count)
 {
@@ -123,7 +123,7 @@ function renderOpenLadders($title, $from, $count, $page = null)
 {
 	$query = "SELECT ladderID, name, description "
 		. "FROM ladders "
-		. "WHERE accessibility = 'PUBLIC' AND (visibility = 'PUBLIC' OR visibility = 'MODERATED') AND active = '1' "
+		. "WHERE visibility = 'PUBLIC' AND active = '1' "
 		. "ORDER BY ladderID DESC ";
 	
 	$render = function($ladder) {

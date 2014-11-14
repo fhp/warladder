@@ -78,35 +78,9 @@ function error404()
 
 function checkLadder($ladderID)
 {
-	$settings = db()->stdGetTry("ladders", array("ladderID"=>$ladderID), array("accessibility", "visibility"));
-	if ($settings === null) error404();
-	
-	if ($settings["visibility"] == "PUBLIC") {
-		return;
-	}
-	
-	if ($settings["accessibility"] == "PUBLIC" || $settings["accessibility"] == "MODERATED") {
-		return;
-	}
-	
-	$userID = currentUserID();
-	if ($userID === null) {
+	if (!db()->stdExists("ladders", array("ladderID"=>$ladderID))) {
 		error404();
 	}
-	
-	if (db()->stdExists("ladderAdmins", array("ladderID"=>$ladderID, "userID"=>$userID))) {
-		return;
-	}
-	
-	$status = db()->stdGetTry("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), "joinStatus");
-	if ($status === null) {
-		error404();
-	}
-	if ($status == "BOOTED") {
-		error404();
-	}
-	
-	return;
 }
 
 function checkLadderPlayer($ladderID, $userID)

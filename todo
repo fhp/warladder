@@ -10,8 +10,6 @@ my ladder settings (myladdersettings.php)
 
 
 mod ladder (modladder.php?ladder=X)
-	invite knop
-	invitation lijst [top10]
 	accept lijst [top10]
 	start knop [met confirm]
 	stop knop [met confirm]
@@ -19,7 +17,6 @@ mod ladder (modladder.php?ladder=X)
 		templates
 		admin lijst
 
-mod ladder invitelist (modinvites.php?ladder=X)
 mod ladder join requestlist (modjoinrequests.php?ladder=X)
 
 

@@ -47,14 +47,9 @@ if(isLoggedIn() && db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID,
 
 HTML;
 } else if(isLoggedIn() && !db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
-	$accessibility = db()->stdGet("ladders", array("ladderID"=>$ladderID), "accessibility");
-	if ($accessibility == "PUBLIC" || $accessibility == "MODERATED") {
-		$joinLadderHtml = <<<HTML
+	$joinLadderHtml = <<<HTML
 <a href="joinladder.php?ladder={$ladderID}" class="btn btn-default">Join this ladder</a>
 HTML;
-	} else {
-		$joinLadderHtml = "";
-	}
 	
 	$html .= $joinLadderHtml . $topRankingHtml . $recentGamesHtml;
 } else {

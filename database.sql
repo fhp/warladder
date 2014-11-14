@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 14, 2014 at 08:29 PM
+-- Generation Time: Nov 14, 2014 at 08:52 PM
 -- Server version: 5.5.40
 -- PHP Version: 5.4.34-0+deb7u1
 
@@ -78,7 +78,7 @@ CREATE TABLE IF NOT EXISTS `ladderPlayers` (
   `sigma` int(11) NOT NULL,
   `rating` int(11) NOT NULL,
   `rank` int(11) NOT NULL,
-  `joinStatus` enum('JOINED','INVITED','SIGNEDUP','BOOTED') NOT NULL,
+  `joinStatus` enum('JOINED','SIGNEDUP','BOOTED') NOT NULL,
   `active` tinyint(1) NOT NULL,
   `simultaneousGames` int(11) NOT NULL,
   `joinTime` int(11) NOT NULL,
@@ -92,16 +92,16 @@ CREATE TABLE IF NOT EXISTS `ladderPlayers` (
 --
 
 CREATE TABLE IF NOT EXISTS `ladders` (
-  `ladderID` int(11) NOT NULL AUTO_INCREMENT,
+  `ladderID` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
   `description` text NOT NULL,
-  `accessibility` enum('PUBLIC','PRIVATE','MODERATED') NOT NULL,
+  `accessibility` enum('PUBLIC','MODERATED') NOT NULL,
   `visibility` enum('PUBLIC','PRIVATE') NOT NULL,
   `active` tinyint(1) NOT NULL,
   `minSimultaneousGames` int(11) DEFAULT NULL,
   `maxSimultaneousGames` int(11) DEFAULT NULL,
   PRIMARY KEY (`ladderID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------
 
