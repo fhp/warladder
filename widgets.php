@@ -153,6 +153,40 @@ function renderMyLadders($userID, $title, $from, $count, $page = null)
 	return renderLongtable($title, "You are not currently playing on any ladders.", "ladders my-ladders", array("Name", "Description", "Rank"), $query, $render, "myladders.php", 50, $page, $from, $count);
 }
 
+function renderAcceptList($ladderID, $title, $from, $count, $page = null)
+{
+	$ladderIDSql = db()->addSlashes($ladderID);
+	$query = "SELECT userID, name "
+		. "FROM ladderPlayers LEFT JOIN users USING (userID) "
+		. "WHERE ladderID = '$ladderIDSql' AND joinStatus = 'SIGNEDUP' "
+		. "ORDER BY joinTime DESC ";
+	
+	$render = function($user) use($ladderID) {
+		$nameHtml = htmlentities($user["name"]);
+		$acceptUrlHtml = htmlentities("acceptplayer.php?ladder={$ladderID}&player={$user["userID"]}&accept=1");
+		$rejectUrlHtml = htmlentities("acceptplayer.php?ladder={$ladderID}&player={$user["userID"]}&accept=0");
+		return "<tr><td><a href=\"player.php?ladder={$ladderID}&player={$user["userID"]}\">$nameHtml</a></td><td><a href=\"$acceptUrlHtml\">Accept player</a></td><td><a href=\"$rejectUrlHtml\">Reject player</a></td></tr>\n";
+	};
+	
+	return renderLongtable($title, "There are no players waiting to join this ladder.", "acceptlist", array("Name", "Accept", "Reject"), $query, $render, "acceptlist.php?ladder=$ladderID", 50, $page, $from, $count);
+}
+
+function renderLadderMods($ladderID, $title, $from, $count, $page = null)
+{
+	$ladderIDSql = db()->addSlashes($ladderID);
+	$query = "SELECT userID, name "
+		. "FROM ladderAdmins LEFT JOIN users USING (userID) "
+		. "WHERE ladderID = '$ladderIDSql' "
+		. "ORDER BY name ASC ";
+	
+	$render = function($user) use($ladderID) {
+		$nameHtml = htmlentities($user["name"]);
+		return "<tr><td><a href=\"player.php?ladder={$ladderID}&player={$user["userID"]}\">$nameHtml</a></td></tr>\n";
+	};
+	
+	return renderLongtable($title, "There are no players waiting to join this ladder.", "laddermodlist", array("Name"), $query, $render, "modlist.php?ladder=$ladderID", 50, $page, $from, $count);
+}
+
 function renderGames($userID, $ladderID, $title, $emptyMessage, $from, $count, $page = null)
 {
 	$header = array();

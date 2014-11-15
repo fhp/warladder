@@ -12,7 +12,8 @@ db()->setQuery("TRUNCATE playerLadderTemplates;");
 db()->setQuery("TRUNCATE templates;");
 db()->setQuery("TRUNCATE users;");
 
-$ladderID = db()->stdNew("ladders", array("name"=>"Test ladder", "description"=>"test ladder description", "accessibility"=>"PUBLIC", "visibility"=>"PUBLIC", "active"=>1, "minSimultaneousGames"=>1, "maxSimultaneousGames"=>5));
+$ladderID = 1337;
+db()->stdNew("ladders", array("ladderID"=>$ladderID, "name"=>"Test ladder", "summary"=>"Alleen om te testen", "message"=>"Doe mee met deze ladder als je warladder wilt testen.\n\nDat is heel erg leuk namelijk!", "accessibility"=>"PUBLIC", "visibility"=>"PUBLIC", "active"=>1, "minSimultaneousGames"=>1, "maxSimultaneousGames"=>5));
 $templateID = db()->stdNew("templates", array("name"=>"Test template", "warlightTemplateID"=>0));
 db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$templateID));
 

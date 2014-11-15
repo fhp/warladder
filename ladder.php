@@ -15,9 +15,13 @@ $ladderMessageHtml = nl2br(htmlentities($ladder["message"]));
 
 $html .= <<<HTML
 <div class="jumbotron">
-	<h1>$ladderNameHtml<br /><small>$ladderSummaryHtml</small></h1>
-	<p>$ladderMessageHtml</p>
+	<div class="container">
+		<h1>$ladderNameHtml<br /><small>$ladderSummaryHtml</small></h1>
+		<p>$ladderMessageHtml</p>
+	</div>
 </div>
+
+<div class="container">
 
 HTML;
 
@@ -58,4 +62,7 @@ HTML;
 	$html .= $topRankingHtml . $recentGamesHtml;
 }
 
-page($html, "ladder");
+
+$html .= "</div>\n";
+
+rawPage($html, "ladder");

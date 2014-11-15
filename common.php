@@ -106,3 +106,24 @@ function isMod($ladderID, $userID = null) {
 	}
 	return db()->stdExists("ladderAdmins", array("ladderID"=>$ladderID, "userID"=>$userID));
 }
+
+function initPlayerRank($ladderID, $userID)
+{
+	db()->startTransaction();
+	$ladderIDSql = db()->addSlashes($ladderID);
+	$rankRecord = db()->query("
+		SELECT MAX(rank) as newRank
+		FROM ladderPlayers
+		WHERE ladderID='$ladderIDSql'
+		AND rating > {$score["rating"]}
+	")->fetchArray();
+	$rank = $rankRecord["newRank"];
+	if($rank === null) {
+		$rank = 0;
+	}
+	db()->setQuery("UPDATE ladderPlayers SET rank = rank + 1 WHERE ladderID = '$ladderID' AND rank > $rank");
+	
+	db()->stdSet("ladderPlayers", array("userID"=>$userID), array("rank"=>$rank + 1));
+	db()->commitTransaction();
+}
+

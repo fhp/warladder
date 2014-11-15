@@ -26,7 +26,6 @@ HTML;
 HTML;
 	
 	echo $header . $pageHtml . $footer;
-
 }
 
 function page($pageHtml, $activeItem)
