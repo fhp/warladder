@@ -8,7 +8,10 @@ function pipeExec($command, $stdin)
 		2 => array("pipe", "w")
 	);
 	
+	$dir = getcwd();
+	chdir(dirname(__FILE__));
 	$process = proc_open($command, $fdSpec, $pipes);
+	chdir($dir);
 	if ($process === false) {
 		return null;
 	}

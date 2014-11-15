@@ -1,7 +1,8 @@
 <?php
 
-require_once("common.php");
+require_once(dirname(__FILE__) . "/../common.php");
 
+// TODO: per speler berekenen op basis van maximum haalbare score
 define('ALWAYS_ACCEPTABLE_MATCH_QUALITY', 0.9);
 define('ACCEPTABLE_MATCH_QUALITY_SLACK_PER_MISSING_GAME', 0.1);
 
@@ -61,7 +62,6 @@ function demoApiCreateGame($templateID, $gameName, $personalMessage, $players)
 
 function finishGames($ladderID)
 {
-	db()->startTransaction();
 	$results = array();
 	
 	$runningGames = db()->stdList("ladderGames", array("ladderID"=>$ladderID, "status"=>"RUNNING"), array("gameID", "warlightGameID"));
@@ -103,16 +103,24 @@ function finishGames($ladderID)
 	$ladderIDSql = db()->addSlashes($ladderID);
 	db()->setQuery("UPDATE ladderPlayers SET rank = 0 WHERE ladderID='$ladderIDSql' AND (active = 0 OR joinStatus <> 'JOINED')");
 	foreach($newScores as $userID => $score) {
+		var_dump($score);
 		db()->stdSet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), $score);
 	}
-	
-	db()->commitTransaction();
 }
 
 
 
 
 
+function describeRank($rank)
+{
+	switch ($rank) {
+		case 1: return "1st";
+		case 2: return "2nd";
+		case 3: return "3rd";
+		default: return "{$rank}th";
+	}
+}
 
 function createGame($ladderID, $userID1, $userID2)
 {
@@ -130,6 +138,7 @@ function createGame($ladderID, $userID1, $userID2)
 	arsort($scores);
 	reset($scores);
 	list($templateID, $score) = each($scores);
+	$templateName = db()->stdGet("templates", array("templateID"=>$templateID), "name");
 	
 	db()->startTransaction();
 	$gameID = db()->stdNew("ladderGames", array("ladderID"=>$ladderID, "templateID"=>$templateID, "warlightGameID"=>null, "name"=>null, "status"=>"RUNNING", "winningUserID"=>null, "startTime"=>time(), "endTime"=>null));
@@ -137,10 +146,22 @@ function createGame($ladderID, $userID1, $userID2)
 	db()->stdNew("gamePlayers", array("gameID"=>$gameID, "userID"=>$userID2));
 	
 	$ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
-	$user1Name = db()->stdGet("users", array("userID"=>$userID1), "name");
-	$user2Name = db()->stdGet("users", array("userID"=>$userID2), "name");
-	$name = "$ladderName game #$gameID: $user1Name vs $user2Name";
-	$description = "Have fun!"; // TODO: fill in something useful
+	$userName1 = db()->stdGet("users", array("userID"=>$userID1), "name");
+	$userName2 = db()->stdGet("users", array("userID"=>$userID2), "name");
+	$user1 = db()->stdGet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID1), array("rating", "rank"));
+	$user2 = db()->stdGet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID2), array("rating", "rank"));
+	$rank1 = describeRank($user1["rank"]);
+	$rank2 = describeRank($user2["rank"]);
+	
+	$name = "$ladderName game #$gameID: $userName1 vs $userName2";
+	
+	$description = <<<DESC
+This game is part of ladder $ladderName. To see up-to-date ladder ratings, visit the ladder page at {$GLOBALS["config"]["baseUrl"]}/ladder.php?ladder=$ladderID
+Contender 1: $userName1 (Ranked $rank1 with a rating of {$user1["rating"]})
+Contender 2: $userName2 (Ranked $rank2 with a rating of {$user2["rating"]})
+
+Settings: $templateName
+DESC;
 	
 	$warlightGameID = demoApiCreateGame($templateID, $name, $description, array($userID1=>1, $userID2=>2));
 	if ($warlightGameID === null) {
@@ -148,7 +169,14 @@ function createGame($ladderID, $userID1, $userID2)
 		return false;
 	}
 	
-	db()->stdSet("ladderGames", array("gameID"=>$gameID), array("warlightGameID"=>$warlightGameID, "name"=>$name));
+	$ladderNameHtml = htmlentities($ladderName);
+	$userName1Html = htmlentities($userName1);
+	$userName2Html = htmlentities($userName2);
+	$htmlName = "<a href=\"http://WarLight.net/MultiPlayer?GameID=$warlightGameID\">$ladderNameHtml game #$gameID</a>: " .
+			"<a href=\"player.php?ladder=$ladderID&player=$userID1\">$userName1Html</a> vs " .
+			"<a href=\"player.php?ladder=$ladderID&player=$userID2\">$userName2Html</a>";
+	
+	db()->stdSet("ladderGames", array("gameID"=>$gameID), array("warlightGameID"=>$warlightGameID, "name"=>$name, "htmlName"=>$htmlName));
 	db()->commitTransaction();
 	
 	return true;
@@ -228,8 +256,8 @@ function createGames($ladderID)
 			INNER JOIN gamePlayers AS player2 ON player2.userID = player1.userID
 			INNER JOIN ladderGames AS game2 ON game2.gameID = player2.gameID
 			
-			WHERE game1.ladderID = 1
-			AND game2.ladderID = 1
+			WHERE game1.ladderID = '$ladderIDSql'
+			AND game2.ladderID = '$ladderIDSql'
 			AND game1.status = 'FINISHED'
 			AND game2.startTime <= game1.endTime
 			AND (game2.status = 'RUNNING' OR game2.endTime >= game1.endTime)
@@ -470,7 +498,9 @@ function createGames($ladderID)
 		/*
 		 * Create a game.
 		 */
-		$success = createGame($ladderID, $userID, $userID2);
+		$gamePlayers = array($userID, $userID2);
+		shuffle($gamePlayers);
+		$success = createGame($ladderID, $gamePlayers[0], $gamePlayers[1]);
 		if (!$success) {
 			// Blacklist this combination.
 			$interveningGamesMatrix[$userID][$userID2] = false;
@@ -506,8 +536,14 @@ function createGames($ladderID)
 	}
 }
 
-// TODO: lock
-// TODO: playerdata updaten
+db()->startTransaction();
+db()->stdLock("ladderPlayers", null);
+db()->stdLock("ladderGames", null);
 
-finishGames(1);
-createGames(1);
+$ladders = db()->stdList("ladders", array("active"=>1), "ladderID");
+foreach($ladders as $ladderID) {
+	finishGames($ladderID);
+	createGames($ladderID);
+}
+
+db()->commitTransaction();
