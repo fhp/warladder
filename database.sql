@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 15, 2014 at 12:52 AM
+-- Generation Time: Nov 15, 2014 at 01:31 AM
 -- Server version: 5.5.40
 -- PHP Version: 5.4.34-0+deb7u1
 
@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS `ladderGames` (
   `templateID` int(11) NOT NULL,
   `warlightGameID` int(11) DEFAULT NULL,
   `name` varchar(255) DEFAULT NULL,
+  `htmlName` text,
   `status` enum('RUNNING','FINISHED') NOT NULL,
   `winningUserID` int(11) DEFAULT NULL,
   `startTime` int(11) NOT NULL,
@@ -69,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `ladderGames` (
   KEY `templateID` (`templateID`),
   KEY `winningUserID` (`winningUserID`),
   KEY `ladderID_2` (`ladderID`,`startTime`,`status`,`endTime`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10198 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10672 ;
 
 -- --------------------------------------------------------
 
@@ -122,16 +123,6 @@ CREATE TABLE IF NOT EXISTS `ladderTemplates` (
   `ladderID` int(11) NOT NULL,
   PRIMARY KEY (`templateID`,`ladderID`),
   UNIQUE KEY `ladderID` (`ladderID`,`templateID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `lock`
---
-
-CREATE TABLE IF NOT EXISTS `lock` (
-  `dummy` int(11) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 -- --------------------------------------------------------

@@ -164,6 +164,7 @@ function renderGames($userID, $ladderID, $title, $emptyMessage, $from, $count, $
 		SELECT ladderGames.gameID,
 			ladderGames.warlightGameID,
 			ladderGames.name AS gameName,
+			ladderGames.htmlName as htmlName,
 			ladderGames.status,
 			ladderGames.winningUserID,
 			ladders.ladderID as ladderID,
@@ -218,10 +219,9 @@ function renderGames($userID, $ladderID, $title, $emptyMessage, $from, $count, $
 			$class = "game-lost";
 		}
 		$class .= " game-finished";
-		// TODO: Reconstruct game name, add player links
 		
 		$output = "<tr class=\"$class\">";
-		$output .= "<td><a href=\"http://WarLight.net/MultiPlayer?GameID={$game["warlightGameID"]}\">$gameNameHtml</a></td>";
+		$output .= "<td>{$game["htmlName"]}</td>";
 		if ($ladderID === null) {
 			$output .= "<td><a href=\"ladder.php?ladder={$game["ladderID"]}\">$ladderNameHtml</a></td>";
 		}

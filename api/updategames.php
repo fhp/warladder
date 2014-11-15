@@ -103,6 +103,7 @@ function finishGames($ladderID)
 	$ladderIDSql = db()->addSlashes($ladderID);
 	db()->setQuery("UPDATE ladderPlayers SET rank = 0 WHERE ladderID='$ladderIDSql' AND (active = 0 OR joinStatus <> 'JOINED')");
 	foreach($newScores as $userID => $score) {
+		var_dump($score);
 		db()->stdSet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), $score);
 	}
 }
@@ -168,7 +169,14 @@ DESC;
 		return false;
 	}
 	
-	db()->stdSet("ladderGames", array("gameID"=>$gameID), array("warlightGameID"=>$warlightGameID, "name"=>$name));
+	$ladderNameHtml = htmlentities($ladderName);
+	$userName1Html = htmlentities($userName1);
+	$userName2Html = htmlentities($userName2);
+	$htmlName = "<a href=\"http://WarLight.net/MultiPlayer?GameID=$warlightGameID\">$ladderNameHtml game #$gameID</a>: " .
+			"<a href=\"player.php?ladder=$ladderID&player=$userID1\">$userName1Html</a> vs " .
+			"<a href=\"player.php?ladder=$ladderID&player=$userID2\">$userName2Html</a>";
+	
+	db()->stdSet("ladderGames", array("gameID"=>$gameID), array("warlightGameID"=>$warlightGameID, "name"=>$name, "htmlName"=>$htmlName));
 	db()->commitTransaction();
 	
 	return true;
