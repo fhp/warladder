@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 15, 2014 at 01:31 AM
+-- Generation Time: Nov 15, 2014 at 02:50 AM
 -- Server version: 5.5.40
 -- PHP Version: 5.4.34-0+deb7u1
 
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS `ladderGames` (
   KEY `templateID` (`templateID`),
   KEY `winningUserID` (`winningUserID`),
   KEY `ladderID_2` (`ladderID`,`startTime`,`status`,`endTime`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=10672 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11032 ;
 
 -- --------------------------------------------------------
 
@@ -81,11 +81,11 @@ CREATE TABLE IF NOT EXISTS `ladderGames` (
 CREATE TABLE IF NOT EXISTS `ladderPlayers` (
   `userID` int(11) NOT NULL,
   `ladderID` int(11) NOT NULL,
-  `mu` int(11) NOT NULL,
-  `sigma` int(11) NOT NULL,
+  `mu` double NOT NULL,
+  `sigma` double NOT NULL,
   `rating` int(11) NOT NULL,
   `rank` int(11) NOT NULL,
-  `joinStatus` enum('JOINED','SIGNEDUP','BOOTED') NOT NULL,
+  `joinStatus` enum('JOINED','SIGNEDUP','REJECTED','BOOTED') NOT NULL,
   `active` tinyint(1) NOT NULL,
   `simultaneousGames` int(11) NOT NULL,
   `joinTime` int(11) NOT NULL,

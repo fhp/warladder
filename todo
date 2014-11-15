@@ -22,8 +22,6 @@ mod ladder join requestlist (modjoinrequests.php?ladder=X)
 
 Teksten aanpassen
 
-TODO: mu/sigma/rating floats maken (of fixed point)
-
 TODO's in code fixen
 
 Opschonen UI
