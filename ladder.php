@@ -17,6 +17,10 @@ if(isLoggedIn() && !db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID
 	$joinLadderHtml = <<<HTML
 <a href="joinladder.php?ladder={$ladderID}" class="btn btn-lg btn-primary">Join this ladder</a>
 HTML;
+} else if(isMod($ladderID)) {
+	$joinLadderHtml = <<<HTML
+<a href="modladder.php?ladder={$ladderID}" class="btn btn-default">Change ladder settings</a>
+HTML;
 } else {
 	$joinLadderHtml = "";
 }

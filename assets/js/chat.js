@@ -42,7 +42,7 @@ function LadderChat(ladderID)
 		$("#chatForm").submit(sendChat);
 		$("#chatShowAll").click(showAllChat)
 		
-		setInterval(updateChat, 1000);
+		setInterval(updateChat, 30000);
 		updateChat();
 	}
 	

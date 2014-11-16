@@ -77,10 +77,48 @@ if(($action = post("action")) !== null) {
 			die();
 		}
 	}
+	if($action == "add-moderator") {
+		$newModID = post("userID");
+		if(!isMod($ladderID, $newModID)) {
+			db()->stdNew("ladderAdmins", array("userID"=>$newModID, "ladderID"=>$ladderID));
+		}
+	}
+	if($action == "remove-moderator") {
+		$oldModID = post("userID");
+		if($oldModID != currentUserID() && isMod($ladderID, $oldModID)) {
+			db()->stdDel("ladderAdmins", array("userID"=>$oldModID, "ladderID"=>$ladderID));
+		}
+	}
+	if($action == "ban-player") {
+		$userID = post("userID");
+		checkLadderPlayer($ladderID, $userID);
+		if(post("confirm") == 1) {
+			removePlayerRank($ladderID, $userID);
+			db()->stdSet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), array("joinStatus"=>"BOOTED"));
+			redirect("ladder.php?ladder=" . $ladderID);
+		} else {
+			$name = db()->stdGet("users", array("userID"=>$userID), "name");
+			$html .= operationForm("modladder.php?ladder=$ladderID", null, "Ban player from ladder", "Yes, ban this player!", array(
+				array("type"=>"hidden", "name"=>"action", "value"=>"ban-player"),
+				array("type"=>"hidden", "name"=>"userID", "value"=>$userID),
+			), null, array("custom"=>"<p class=\"alert alert-warning\"><b>Warning:</b> Are you sure you want to ban <b>$name</b> from this ladder?</p>"));
+			page($html, "modladder", null);
+			die();
+		}
+	}
+	if($action == "add-template") {
+		$template = post("template");
+		$name = post("templateName");
+		if(strpos($template, "TemplateID=") === false) {
+			$templateID = (int)$template;
+		} else {
+			$templateID = (int)substr($template, strrpos($template, "=") + 1);
+		}
+		if($templateID != 0 && strlen($name) > 0) {
+			db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>$templateID, "name"=>$name));
+		}
+	}
 }
-
-// mod ladder (modladder.php?ladder=X)
-// 	mod lijst
 
 if(db()->stdGet("ladders", array("ladderID"=>$ladderID), "accessibility") == "MODERATED") {
 	$html .= renderAcceptList($ladderID, "Accept players", 0, 10);
@@ -107,6 +145,28 @@ $html .= operationForm("modladder.php?ladder=$ladderID", $change_settings_error,
 ), $values, $change_settings_messages);
 
 $html .= renderLadderMods($ladderID, "Ladder moderators", 0, 10);
+
+$ladderIDSql = db()->addSlashes($ladderID);
+$players = db()->query("SELECT userID, name FROM users LEFT JOIN ladderPlayers USING(userID) WHERE ladderID = '$ladderIDSql'")->fetchList();
+$playerOptions = array();
+foreach($players as $player) {
+	$playerOptions[] = array("value"=>$player["userID"], "label"=>$player["name"]);
+}
+
+$html .= operationForm("modladder.php?ladder=$ladderID", "", "Add moderator", "add", array(
+	array("type"=>"hidden", "name"=>"action", "value"=>"add-moderator"),
+	array("title"=>"New moderator", "type"=>"dropdown", "name"=>"userID", "options"=>$playerOptions),
+), null);
+
+
+$html .= operationForm("modladder.php?ladder=$ladderID", "", "Add new template", "add", array(
+	array("type"=>"hidden", "name"=>"action", "value"=>"add-template"),
+	array("title"=>"Template", "type"=>"text", "name"=>"template"),
+	array("title"=>"Name", "type"=>"text", "name"=>"templateName"),
+), null);
+
+// warlight.net/MultiPlayer?TemplateID=546673
+
 
 // TODO: betere namen, mogelijk start-knop bovenaan de pagina.
 if(db()->stdGet("ladders", array("ladderID"=>$ladderID), "active") == 0) {

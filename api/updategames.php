@@ -138,7 +138,7 @@ function createGame($ladderID, $userID1, $userID2)
 	arsort($scores);
 	reset($scores);
 	list($templateID, $score) = each($scores);
-	$templateName = db()->stdGet("templates", array("templateID"=>$templateID), "name");
+	$templateName = db()->stdGet("ladderTemplates", array("templateID"=>$templateID), "name");
 	
 	db()->startTransaction();
 	$gameID = db()->stdNew("ladderGames", array("ladderID"=>$ladderID, "templateID"=>$templateID, "warlightGameID"=>null, "name"=>null, "status"=>"RUNNING", "winningUserID"=>null, "startTime"=>time(), "endTime"=>null));
@@ -163,7 +163,8 @@ Contender 2: $userName2 (Ranked $rank2 with a rating of {$user2["rating"]})
 Settings: $templateName
 DESC;
 	
-	$warlightGameID = demoApiCreateGame($templateID, $name, $description, array($userID1=>1, $userID2=>2));
+	$warlightTemplateID = db()->stdGet("ladderTemplates", array("templateID"=>$templateID), "warlightTemplateID");
+	$warlightGameID = demoApiCreateGame($warlightTemplateID, $name, $description, array($userID1=>1, $userID2=>2));
 	if ($warlightGameID === null) {
 		db()->rollbackTransaction();
 		return false;

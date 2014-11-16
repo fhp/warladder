@@ -131,3 +131,15 @@ function initPlayerRank($ladderID, $userID, $rating = null)
 	db()->commitTransaction();
 }
 
+function removePlayerRank($ladderID, $userID)
+{
+	db()->startTransaction();
+	$rank = db()->stdGet("ladderPlayers", array("userID"=>$userID, "ladderID"=>$ladderID), "rank");
+	
+	$ladderIDSql = db()->addSlashes($ladderID);
+	db()->setQuery("UPDATE ladderPlayers SET rank = rank - 1 WHERE ladderID = '$ladderID' AND rank > $rank");
+	
+	db()->stdSet("ladderPlayers", array("userID"=>$userID, "ladderID"=>$ladderID), array("rank"=>0));
+	db()->commitTransaction();
+}
+

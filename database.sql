@@ -3,7 +3,7 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 16, 2014 at 08:55 PM
+-- Generation Time: Nov 17, 2014 at 12:03 AM
 -- Server version: 5.5.40
 -- PHP Version: 5.4.34-0+deb7u1
 
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `ladderGames` (
   KEY `templateID` (`templateID`),
   KEY `winningUserID` (`winningUserID`),
   KEY `ladderID_2` (`ladderID`,`startTime`,`status`,`endTime`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=151 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=299 ;
 
 -- --------------------------------------------------------
 
@@ -137,11 +137,13 @@ CREATE TABLE IF NOT EXISTS `ladders` (
 --
 
 CREATE TABLE IF NOT EXISTS `ladderTemplates` (
-  `templateID` int(11) NOT NULL,
+  `templateID` int(11) NOT NULL AUTO_INCREMENT,
   `ladderID` int(11) NOT NULL,
+  `warlightTemplateID` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
   PRIMARY KEY (`templateID`,`ladderID`),
   UNIQUE KEY `ladderID` (`ladderID`,`templateID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 
 -- --------------------------------------------------------
 
@@ -156,19 +158,6 @@ CREATE TABLE IF NOT EXISTS `playerLadderTemplates` (
   `score` int(11) NOT NULL,
   PRIMARY KEY (`userID`,`ladderID`,`templateID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
--- --------------------------------------------------------
-
---
--- Table structure for table `templates`
---
-
-CREATE TABLE IF NOT EXISTS `templates` (
-  `templateID` int(11) NOT NULL AUTO_INCREMENT,
-  `warlightTemplateID` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  PRIMARY KEY (`templateID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=2 ;
 
 -- --------------------------------------------------------
 

@@ -26,4 +26,11 @@ $recentGamesHtml
 
 HTML;
 
+if(isMod($ladderID)) {
+	$html .= operationForm("modladder.php?ladder=$ladderID", "", "Ban player from ladder", "ban", array(
+		array("type"=>"hidden", "name"=>"action", "value"=>"ban-player"),
+		array("type"=>"hidden", "name"=>"userID", "value"=>$userID),
+	), null);
+}
+
 page($html, "player");

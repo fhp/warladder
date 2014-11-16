@@ -1,6 +1,3 @@
-ranking (ranking.php?ladder=X)
-	MOD: boot [met confirm]
-
 my ladder settings (myladdersettings.php)
 	templates beheren
 	num games
@@ -9,7 +6,6 @@ my ladder settings (myladdersettings.php)
 mod ladder (modladder.php?ladder=X)
 	settings
 		templates
-		admin lijst
 
 Teksten aanpassen
 
@@ -20,6 +16,7 @@ Opschonen UI
 Meer vulling
 
 Ladder joinen => settings doorgeven!
+Ladder joinen => player level checken!
 
 Live testen
 

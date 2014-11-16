@@ -97,6 +97,7 @@ function renderRanking($ladderID, $title, $emptyMessage, $highlightUserID, $from
 	$query = "SELECT rating, rank, userID, name "
 		. "FROM ladderPlayers INNER JOIN users USING(userID) "
 		. "WHERE ladderPlayers.ladderID = '$ladderIDSql' "
+		. "AND ladderPlayers.joinStatus = 'JOINED' "
 		. "ORDER BY rank ASC, userID ASC ";
 	
 	$render = function($player) use($ladderID, $highlightUserID) {
@@ -181,10 +182,10 @@ function renderLadderMods($ladderID, $title, $from, $count, $page = null)
 	
 	$render = function($user) use($ladderID) {
 		$nameHtml = htmlentities($user["name"]);
-		return "<tr><td><a href=\"player.php?ladder={$ladderID}&player={$user["userID"]}\">$nameHtml</a></td></tr>\n";
+		return "<tr><td><a href=\"player.php?ladder={$ladderID}&player={$user["userID"]}\">$nameHtml</a></td><td><form action=\"modladder.php?ladder={$ladderID}\" method=\"post\"><input type=\"hidden\" name=\"userID\" value=\"{$user["userID"]}\"><input type=\"hidden\" name=\"action\" value=\"remove-moderator\"><button type=\"submit\" class=\"btn btn-link\">Revoke admin privileges</button></form></td></tr>\n";
 	};
 	
-	return renderLongtable($title, "There are no players waiting to join this ladder.", "laddermodlist", array("Name"), $query, $render, "modlist.php?ladder=$ladderID", 50, $page, $from, $count);
+	return renderLongtable($title, "There are no players waiting to join this ladder.", "laddermodlist", array("Name", "Revoke admin privileges"), $query, $render, "modlist.php?ladder=$ladderID", 50, $page, $from, $count);
 }
 
 function renderGames($userID, $ladderID, $title, $emptyMessage, $from, $count, $page = null)
