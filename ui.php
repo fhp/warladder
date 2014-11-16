@@ -13,6 +13,7 @@ function rawPage($pageHtml, $activeItem)
 	<link rel="stylesheet" type="text/css" href="assets/css/warladder.css">
 	<script src="assets/js/jquery-2.1.1.min.js"></script>
 	<script src="assets/js/bootstrap.min.js"></script>
+	<script src="assets/js/chat.js"></script>
 </head>
 <body>
 	$menu

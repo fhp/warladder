@@ -13,11 +13,20 @@ $ladderNameHtml = htmlentities($ladder["name"]);
 $ladderSummaryHtml = htmlentities($ladder["summary"]);
 $ladderMessageHtml = nl2br(htmlentities($ladder["message"]));
 
+if(isLoggedIn() && !db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
+	$joinLadderHtml = <<<HTML
+<a href="joinladder.php?ladder={$ladderID}" class="btn btn-lg btn-primary">Join this ladder</a>
+HTML;
+} else {
+	$joinLadderHtml = "";
+}
+
 $html .= <<<HTML
 <div class="jumbotron">
 	<div class="container">
 		<h1>$ladderNameHtml<br /><small>$ladderSummaryHtml</small></h1>
 		<p>$ladderMessageHtml</p>
+		$joinLadderHtml
 	</div>
 </div>
 
@@ -52,16 +61,25 @@ if(isLoggedIn() && db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID,
 </div>
 
 HTML;
-} else if(isLoggedIn() && !db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
-	$joinLadderHtml = <<<HTML
-<a href="joinladder.php?ladder={$ladderID}" class="btn btn-default">Join this ladder</a>
-HTML;
-	
-	$html .= $joinLadderHtml . $topRankingHtml . $recentGamesHtml;
 } else {
 	$html .= $topRankingHtml . $recentGamesHtml;
 }
 
+$html .= <<<HTML
+<div class="panel panel-default chat">
+	<div class="panel-heading">Ladder Chat</div>
+	<table class="table table-condensed" id="chatLines"></table>
+	<div class="panel-footer enterChat">
+		<form id="chatForm"><table><tr>
+			<td class="stretch newChatLinetd"><input type="text" name="newChatLine" id="newChatLine" class="form-control"></td>
+			<td><input type="submit" name="newChatLineSubmit" id="newChatLineSubmit" class="btn btn-default" value="Send"></td>
+			<td><input type="button" name="chatShowAll" id="chatShowAll" class="btn" value="Show all"></td>
+		</tr></table></form>
+	</div>
+</div>
+<script>new LadderChat($ladderID);</script>
+
+HTML;
 
 $html .= "</div>\n";
 

@@ -49,3 +49,26 @@ table .stretch {
 .stretch-50 {
 	width: 50%;
 }
+
+.show-all {
+	text-align: right;
+}
+
+#chatForm table {
+	width: 100%;
+}
+#newChatLine {
+	width: 100%;
+}
+#chatForm td {
+	padding-right: 15px;
+}
+#chatForm td:last-child {
+	padding-right: 0px;
+}
+#chatLines tbody {
+	max-height: 250px;
+	overflow: auto;
+	display: block;
+	width: 100%;
+}

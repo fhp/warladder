@@ -1,9 +1,9 @@
 -- phpMyAdmin SQL Dump
--- version 3.4.10.1
+-- version 3.4.11.1deb2+deb7u1
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 15, 2014 at 02:50 AM
+-- Generation Time: Nov 16, 2014 at 08:55 PM
 -- Server version: 5.5.40
 -- PHP Version: 5.4.34-0+deb7u1
 
@@ -49,6 +49,24 @@ CREATE TABLE IF NOT EXISTS `ladderAdmins` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `ladderChat`
+--
+
+CREATE TABLE IF NOT EXISTS `ladderChat` (
+  `chatLineID` int(11) NOT NULL AUTO_INCREMENT,
+  `ladderID` int(11) NOT NULL,
+  `userID` int(11) NOT NULL,
+  `message` varchar(255) NOT NULL,
+  `timestamp` int(11) NOT NULL,
+  PRIMARY KEY (`chatLineID`),
+  KEY `ladderID` (`ladderID`),
+  KEY `userID` (`userID`),
+  KEY `timestamp` (`timestamp`)
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=63 ;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `ladderGames`
 --
 
@@ -70,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `ladderGames` (
   KEY `templateID` (`templateID`),
   KEY `winningUserID` (`winningUserID`),
   KEY `ladderID_2` (`ladderID`,`startTime`,`status`,`endTime`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=11032 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=151 ;
 
 -- --------------------------------------------------------
 
