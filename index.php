@@ -44,6 +44,10 @@ if(isLoggedIn()) {
 		</div>
 		<div class="col-md-6">
 			$myLaddersHtml
+		</div>
+	</div>
+	<div class="row">
+		<div class="col-md-12">
 			$myGamesHtml
 		</div>
 	</div>
