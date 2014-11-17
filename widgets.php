@@ -122,18 +122,21 @@ function renderRanking($ladderID, $title, $emptyMessage, $highlightUserID, $from
 
 function renderOpenLadders($title, $from, $count, $page = null)
 {
-	$query = "SELECT ladderID, name, summary "
+	$query = "SELECT ladderID, name, summary, COUNT(userID) AS players "
 		. "FROM ladders "
-		. "WHERE visibility = 'PUBLIC' AND active = '1' "
+		. "INNER JOIN ladderPlayers USING (ladderID) "
+		. "WHERE visibility = 'PUBLIC' AND ladders.active = '1' "
+		. "AND joinStatus = 'JOINED' AND ladderPlayers.active = '1' "
+		. "GROUP BY ladderID, name, summary "
 		. "ORDER BY ladderID DESC ";
 	
 	$render = function($ladder) {
 		$nameHtml = htmlentities($ladder["name"]);
 		$summaryHtml = htmlentities($ladder["summary"]);
-		return "<tr><td><a href=\"ladder.php?ladder={$ladder["ladderID"]}\">$nameHtml</a></td><td>$summaryHtml</td></tr>\n";
+		return "<tr><td><a href=\"ladder.php?ladder={$ladder["ladderID"]}\">$nameHtml</a></td><td>$summaryHtml</td><td><a href=\"ranking.php?ladder={$ladder["ladderID"]}\">{$ladder["players"]}</a></td></tr>\n";
 	};
 	
-	return renderLongtable($title, "There are currently no open ladders available.", "ladders open-ladders", array("Name", "Description"), $query, $render, "ladders.php", 50, $page, $from, $count);
+	return renderLongtable($title, "There are currently no open ladders available.", "ladders open-ladders", array("Name", "Description", "Players"), $query, $render, "ladders.php", 50, $page, $from, $count);
 }
 
 function renderMyLadders($userID, $title, $from, $count, $page = null)
