@@ -1,14 +1,19 @@
 <?php
 
-function rawPage($pageHtml, $activeItem)
+function rawPage($pageHtml, $activeItem, $title = null)
 {
 	$menu = menu($activeItem);
+	
+	$titleHtml = "";
+	if ($title !== null) {
+		$titleHtml = htmlentities($title) . " - ";
+	}
 	
 	$header = <<<HTML
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>Warladder</title>
+	<title>{$titleHtml}Warladder</title>
 	<link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="assets/css/warladder.css">
 	<script src="assets/js/jquery-2.1.1.min.js"></script>
@@ -29,9 +34,38 @@ HTML;
 	echo $header . $pageHtml . $footer;
 }
 
-function page($pageHtml, $activeItem)
+function page($pageHtml, $activeItem, $title = null, $subtitle = null, $headerMessage = null, $titleLink = null)
 {
-	return rawpage('<div class="container">' . $pageHtml . '</div>', $activeItem);
+	$jumbotron = "";
+	if ($title !== null) {
+		$jumbotron .= "<div class=\"jumbotron\">\n";
+		$jumbotron .= "<div class=\"container\">\n";
+		
+		$jumbotron .= "<h1>";
+		if ($titleLink !== null) {
+			$titleLinkHtml = htmlentities($titleLink);
+			$jumbotron .= "<a href=\"$titleLinkHtml\">";
+		}
+		$jumbotron .= $title;
+		if ($titleLink !== null) {
+			$jumbotron .= "</a>";
+		}
+		
+		if ($subtitle !== null) {
+			$jumbotron .= "<br><small>$subtitle</small>";
+		}
+		
+		$jumbotron .= "</h1>\n";
+		
+		if ($headerMessage !== null) {
+			$jumbotron .= "$headerMessage\n";
+		}
+		
+		$jumbotron .= "</div>\n";
+		$jumbotron .= "</div>\n";
+	}
+	
+	return rawpage($jumbotron . '<div class="container">' . $pageHtml . '</div>', $activeItem, $title);
 }
 
 function menu($activeItem)

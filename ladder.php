@@ -9,34 +9,17 @@ $html = "";
 
 $ladder = db()->stdGet("ladders", array("ladderID"=>$ladderID), array("name", "summary", "message"));
 
-$ladderNameHtml = htmlentities($ladder["name"]);
-$ladderSummaryHtml = htmlentities($ladder["summary"]);
-$ladderMessageHtml = nl2br(htmlentities($ladder["message"]));
-
 if(isLoggedIn() && !db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
-	$joinLadderHtml = <<<HTML
-<a href="joinladder.php?ladder={$ladderID}" class="btn btn-lg btn-primary">Join this ladder</a>
+	$ladderOperationHtml = <<<HTML
+<p><a href="joinladder.php?ladder={$ladderID}" class="btn btn-lg btn-primary">Join this ladder</a></p>
 HTML;
 } else if(isMod($ladderID)) {
-	$joinLadderHtml = <<<HTML
-<a href="modladder.php?ladder={$ladderID}" class="btn btn-default">Change ladder settings</a>
+	$ladderOperationHtml = <<<HTML
+<p><a href="modladder.php?ladder={$ladderID}" class="btn btn-default">Change ladder settings</a></p>
 HTML;
 } else {
-	$joinLadderHtml = "";
+	$ladderOperationHtml = "";
 }
-
-$html .= <<<HTML
-<div class="jumbotron">
-	<div class="container">
-		<h1>$ladderNameHtml<br /><small>$ladderSummaryHtml</small></h1>
-		<p>$ladderMessageHtml</p>
-		$joinLadderHtml
-	</div>
-</div>
-
-<div class="container">
-
-HTML;
 
 $topRankingHtml = renderRanking($ladderID, "Top players", "There don't seem to be any players on this ladder.", null, 0, 10);
 $recentGamesHtml = renderGames(null, $ladderID, "Recent games", "No games have been played on this ladder yet.", 0, 10);
@@ -85,6 +68,4 @@ $html .= <<<HTML
 
 HTML;
 
-$html .= "</div>\n";
-
-rawPage($html, "ladder");
+page($html, "ladder", $ladder["name"], htmlentities($ladder["summary"]), "<p>" . nl2br(htmlentities($ladder["message"])) . "</p>$ladderOperationHtml");
