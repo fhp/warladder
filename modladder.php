@@ -16,7 +16,15 @@ $html = <<<HTML
 
 HTML;
 
-if(($action = post("action")) !== null) {
+if (($removeTemplate = post("remove-template")) !== null) {
+	// TODO: confirm
+	db()->stdDel("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$removeTemplate));
+} else if (($removeAdmin = post("remove-admin")) !== null) {
+	// TODO: confirm
+	if($removeAdmin != currentUserID() && isMod($ladderID, $removeAdmin)) {
+		db()->stdDel("ladderAdmins", array("userID"=>$removeAdmin, "ladderID"=>$ladderID));
+	}
+} else if(($action = post("action")) !== null) {
 	if($action == "change-settings") {
 		$values["name"] = post("name");
 		if($values["name"] === null || $values["name"] == "") {
@@ -40,14 +48,14 @@ if(($action = post("action")) !== null) {
 		}
 		$values["minSimultaneousGames"] = post("minSimultaneousGames");
 		if(!ctype_digit($values["minSimultaneousGames"])) {
-			$change_settings_error .= formError("Please enter a number for the minimal simultainius games.");
+			$change_settings_error .= formError("Please enter a number for the minimal simultaneous games.");
 		}
 		$values["maxSimultaneousGames"] = post("maxSimultaneousGames");
 		if(!ctype_digit($values["maxSimultaneousGames"])) {
-			$change_settings_error .= formError("Please enter a number for the maximal simultainius games.");
+			$change_settings_error .= formError("Please enter a number for the maximal simultaneous games.");
 		}
 		if($values["minSimultaneousGames"] > $values["maxSimultaneousGames"]) {
-			$change_settings_error .= formError("The minimal number of simultainius games must be smaller than the maximal number of simultainius games.");
+			$change_settings_error .= formError("The minimal number of simultaneous games must be smaller than the maximal number of simultaneous games.");
 		}
 		if($change_settings_error == "") {
 			db()->stdSet("ladders", array("ladderID"=>$ladderID), $values);
@@ -83,12 +91,6 @@ if(($action = post("action")) !== null) {
 			db()->stdNew("ladderAdmins", array("userID"=>$newModID, "ladderID"=>$ladderID));
 		}
 	}
-	if($action == "remove-moderator") {
-		$oldModID = post("userID");
-		if($oldModID != currentUserID() && isMod($ladderID, $oldModID)) {
-			db()->stdDel("ladderAdmins", array("userID"=>$oldModID, "ladderID"=>$ladderID));
-		}
-	}
 	if($action == "ban-player") {
 		$userID = post("userID");
 		checkLadderPlayer($ladderID, $userID);
@@ -115,14 +117,21 @@ if(($action = post("action")) !== null) {
 			$templateID = (int)substr($template, strrpos($template, "=") + 1);
 		}
 		if($templateID != 0 && strlen($name) > 0) {
+			// TODO: checken of de templateID al bestaat in de database
 			db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>$templateID, "name"=>$name));
 		}
 	}
 }
 
+
+
 if(db()->stdGet("ladders", array("ladderID"=>$ladderID), "accessibility") == "MODERATED") {
-	$html .= renderAcceptList($ladderID, "Accept players", 0, 10);
+	$html .= "<div class=\"accept-players\">\n";
+	$html .= "<h2>Joining Players</h2>\n";
+	$html .= renderAcceptList($ladderID, "These players want to join this ladder. As a moderator, you can either accept or reject them.", 0, 10);
+	$html .= "</div>\n";
 }
+
 
 
 if($change_settings_error == "") {
@@ -136,7 +145,7 @@ $html .= operationForm("modladder.php?ladder=$ladderID", $change_settings_error,
 	array("title"=>"Message", "type"=>"textarea", "name"=>"message"),
 	array("title"=>"Joining policy", "type"=>"dropdown", "name"=>"accessibility", "options"=>array(array("value"=>"PUBLIC", "label"=>"Everyone can join"), array("value"=>"MODERATED", "label"=>"Moderator must approve"))),
 	array("title"=>"Show on front page", "type"=>"dropdown", "name"=>"visibility", "options"=>array(array("value"=>"PUBLIC", "label"=>"Yes"), array("value"=>"PRIVATE", "label"=>"No"))),
-	array("title"=>"Number of simultainius games", "type"=>"colspan", "columns"=>array(
+	array("title"=>"Number of simultaneous games", "type"=>"colspan", "columns"=>array(
 		array("type"=>"html", "html"=>_("Minimal")),
 		array("type"=>"text", "name"=>"minSimultaneousGames", "cellclass"=>"stretch-50"),
 		array("type"=>"html", "html"=>_("Maximal")),
@@ -144,26 +153,21 @@ $html .= operationForm("modladder.php?ladder=$ladderID", $change_settings_error,
 	)),
 ), $values, $change_settings_messages);
 
-$html .= renderLadderMods($ladderID, "Ladder moderators", 0, 10);
-
-$ladderIDSql = db()->addSlashes($ladderID);
-$players = db()->query("SELECT userID, name FROM users LEFT JOIN ladderPlayers USING(userID) WHERE ladderID = '$ladderIDSql'")->fetchList();
-$playerOptions = array();
-foreach($players as $player) {
-	$playerOptions[] = array("value"=>$player["userID"], "label"=>$player["name"]);
-}
-
-$html .= operationForm("modladder.php?ladder=$ladderID", "", "Add moderator", "add", array(
-	array("type"=>"hidden", "name"=>"action", "value"=>"add-moderator"),
-	array("title"=>"New moderator", "type"=>"dropdown", "name"=>"userID", "options"=>$playerOptions),
-), null);
 
 
-$html .= operationForm("modladder.php?ladder=$ladderID", "", "Add new template", "add", array(
-	array("type"=>"hidden", "name"=>"action", "value"=>"add-template"),
-	array("title"=>"Template", "type"=>"text", "name"=>"template"),
-	array("title"=>"Name", "type"=>"text", "name"=>"templateName"),
-), null);
+$html .= "<div class=\"ladder-templates\">\n";
+$html .= "<h2>Templates</h2>\n";
+$html .= renderLadderTemplates($ladderID, "modladder.php?ladder=$ladderID", "templateName", "template", "add-template");
+$html .= "</div>\n";
+
+
+
+$html .= "<div class=\"ladder-moderators\">\n";
+$html .= "<h2>Moderators</h2>\n";
+$html .= renderLadderMods($ladderID, "modladder.php?ladder=$ladderID", "userID", "add-moderator");
+$html .= "</div>\n";
+
+
 
 // warlight.net/MultiPlayer?TemplateID=546673
 
