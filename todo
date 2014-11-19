@@ -1,15 +1,12 @@
+Bij eerste bezoek, na klikken op "join today" en na warlight clot pagina, eerst email adres invullen en account maken.
+
 my ladder settings (myladdersettings.php)
 	templates beheren
 	num games
-	actief ja/nee
-
-mod ladder (modladder.php?ladder=X)
-	settings
-		templates
+	actief ja/nee (pauze)
+	email settings
 
 Teksten aanpassen
-
-TODO's in code fixen
 
 Opschonen UI
 
@@ -18,9 +15,18 @@ Meer vulling
 Ladder joinen => settings doorgeven!
 Ladder joinen => player level checken!
 
-Live testen
 
 Email notificaties:
 	mod: nieuwe mensen
 	ladder status (maandelijks)
 	confirm email
+
+chat: geen berichten melding.
+
+About pagina maken
+
+naam => warladder.net
+
+Live testen
+
+TODO's in code fixen
