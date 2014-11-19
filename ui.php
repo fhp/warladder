@@ -34,27 +34,22 @@ HTML;
 	echo $header . $pageHtml . $footer;
 }
 
-function page($pageHtml, $activeItem, $title = null, $subtitle = null, $headerMessage = null, $titleLink = null)
+function page($pageHtml, $activeItem, $title = null, $subtitle = null, $headerMessage = null, $pageTitle = null)
 {
+	if ($pageTitle === null) {
+		$pageTitle = $title;
+	}
+	
 	$jumbotron = "";
 	if ($title !== null) {
 		$jumbotron .= "<div class=\"jumbotron\">\n";
 		$jumbotron .= "<div class=\"container\">\n";
 		
 		$jumbotron .= "<h1>";
-		if ($titleLink !== null) {
-			$titleLinkHtml = htmlentities($titleLink);
-			$jumbotron .= "<a href=\"$titleLinkHtml\">";
-		}
 		$jumbotron .= $title;
-		if ($titleLink !== null) {
-			$jumbotron .= "</a>";
-		}
-		
 		if ($subtitle !== null) {
 			$jumbotron .= "<br><small>$subtitle</small>";
 		}
-		
 		$jumbotron .= "</h1>\n";
 		
 		if ($headerMessage !== null) {
@@ -65,7 +60,7 @@ function page($pageHtml, $activeItem, $title = null, $subtitle = null, $headerMe
 		$jumbotron .= "</div>\n";
 	}
 	
-	return rawpage($jumbotron . '<div class="container">' . $pageHtml . '</div>', $activeItem, $title);
+	return rawpage($jumbotron . '<div class="container">' . $pageHtml . '</div>', $activeItem, $pageTitle);
 }
 
 function menu($activeItem)
