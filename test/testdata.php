@@ -1,21 +1,20 @@
 <?php
 
-require_once("common.php");
+require_once(dirname(__FILE__) . "/../common.php");
 
 db()->setQuery("TRUNCATE gamePlayers;");
 db()->setQuery("TRUNCATE ladderAdmins;");
+db()->setQuery("TRUNCATE ladderChat;");
 db()->setQuery("TRUNCATE ladderGames;");
 db()->setQuery("TRUNCATE ladderPlayers;");
 db()->setQuery("TRUNCATE ladders;");
 db()->setQuery("TRUNCATE ladderTemplates;");
 db()->setQuery("TRUNCATE playerLadderTemplates;");
-db()->setQuery("TRUNCATE templates;");
 db()->setQuery("TRUNCATE users;");
 
 $ladderID = 1337;
 db()->stdNew("ladders", array("ladderID"=>$ladderID, "name"=>"Test ladder", "summary"=>"Alleen om te testen", "message"=>"Doe mee met deze ladder als je warladder wilt testen.\n\nDat is heel erg leuk namelijk!", "accessibility"=>"PUBLIC", "visibility"=>"PUBLIC", "active"=>1, "minSimultaneousGames"=>1, "maxSimultaneousGames"=>5));
-$templateID = db()->stdNew("templates", array("name"=>"Test template", "warlightTemplateID"=>0));
-db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$templateID));
+$templateID = db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>"12345", "name"=>"Demo template"));
 
 $score = tsDefaultScore();
 for($i = 1; $i <= 100; $i++) {
