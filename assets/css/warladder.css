@@ -12,6 +12,14 @@ tr.highlight {
 	margin-top: -20px;
 }
 
+.jumbotron h1 a {
+	color: #333333;
+}
+
+.jumbotron h1 small a {
+	color: #777777;
+}
+
 .operation tbody th {
 	text-align: right;
 	white-space: nowrap;

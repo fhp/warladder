@@ -7,24 +7,18 @@ $userID = get("player");
 
 checkLadderPlayer($ladderID, $userID);
 
+$ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
+$playerName = db()->stdGet("users", array("userID"=>$userID), "name");
+
+$playerNameHtml = htmlentities($playerName);
+$ladderNameHtml = htmlentities($ladderName);
+
 $html = "";
 
-$playerNameHtml = htmlentities(db()->stdGet("users", array("userID"=>$userID), "name"));
-$ladderNameHtml = htmlentities(db()->stdGet("ladders", array("ladderID"=>$ladderID), "name"));
-
 $playerRank = db()->stdGet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), "rank");
-$rankingHtml = renderRanking($ladderID, "$playerNameHtml's rank", "There don't seem to be any players on this ladder.", $userID, max($playerRank - 6, 0), 10);
-$recentGamesHtml = renderGames($userID, $ladderID, "$playerNameHtml's recent games", "$playerNameHtml has not played any games on this ladder yet.", 0, 10);
+$html .= renderRanking($ladderID, "$playerNameHtml's rank", "There don't seem to be any players on this ladder.", $userID, max($playerRank - 6, 0), 10);
 
-$html .= <<<HTML
-<div class="panel panel-default">
-  <div class="panel-heading"><h1 class="panel-title">$playerNameHtml on $ladderNameHtml</h1></div>
-</div>
-
-$rankingHtml
-$recentGamesHtml
-
-HTML;
+$html .= renderGames($userID, $ladderID, "$playerNameHtml's recent games", "$playerNameHtml has not played any games on this ladder yet.", 0, 10);
 
 if(isMod($ladderID)) {
 	$html .= operationForm("modladder.php?ladder=$ladderID", "", "Ban player from ladder", "ban", array(
@@ -33,4 +27,6 @@ if(isMod($ladderID)) {
 	), null);
 }
 
-page($html, "player");
+$titleHtml = "$playerNameHtml's activity on <a href=\"ladder.php?ladder=$ladderID\">$ladderNameHtml</a>";
+
+page($html, "player", "$playerNameHtml's activity", "<a href=\"ladder.php?ladder=$ladderID\">$ladderNameHtml</a>", null, "$playerName's activity - $ladderName");
