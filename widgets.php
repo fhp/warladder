@@ -2,7 +2,9 @@
 
 function renderLongtable($title, $emptyMessage, $class, $header, $query, $render, $url, $pageSize, $page, $from, $count)
 {
-	$titleHtml = htmlentities($title);
+	if ($title !== null) {
+		$titleHtml = htmlentities($title);
+	}
 	
 	if ($page !== null) {
 		$from = ($page - 1) * $pageSize;
@@ -16,7 +18,9 @@ function renderLongtable($title, $emptyMessage, $class, $header, $query, $render
 	
 	$output = "";
 	$output .= "<div class=\"panel panel-default $class\">\n";
-	$output .= "<div class=\"panel-heading\"><h3>$titleHtml</h3></div>\n";
+	if ($title !== null) {
+		$output .= "<div class=\"panel-heading\"><h3>$titleHtml</h3></div>\n";
+	}
 	$output .= "<table class=\"table table-condensed\">\n";
 	$output .= "<thead><tr>";
 	foreach($header as $head) {
