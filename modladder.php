@@ -165,9 +165,9 @@ $html .= operationForm("modladder.php?ladder=$ladderID", $change_settings_error,
 	array("title"=>"Joining policy", "type"=>"dropdown", "name"=>"accessibility", "options"=>array(array("value"=>"PUBLIC", "label"=>"Everyone can join"), array("value"=>"MODERATED", "label"=>"Moderator must approve"))),
 	array("title"=>"Show on front page", "type"=>"dropdown", "name"=>"visibility", "options"=>array(array("value"=>"PUBLIC", "label"=>"Yes"), array("value"=>"PRIVATE", "label"=>"No"))),
 	array("title"=>"Number of simultaneous games", "type"=>"colspan", "columns"=>array(
-		array("type"=>"html", "html"=>_("Minimal")),
+		array("type"=>"html", "html"=>"Minimal"),
 		array("type"=>"text", "name"=>"minSimultaneousGames", "cellclass"=>"stretch-50"),
-		array("type"=>"html", "html"=>_("Maximal")),
+		array("type"=>"html", "html"=>"Maximal"),
 		array("type"=>"text", "name"=>"maxSimultaneousGames", "cellclass"=>"stretch-50")
 	)),
 ), $values, $change_settings_messages);
