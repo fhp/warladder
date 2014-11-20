@@ -13,7 +13,7 @@ function rawPage($pageHtml, $activeItem, $title = null)
 <!DOCTYPE html>
 <html lang="en">
 <head>
-	<title>{$titleHtml}Warladder</title>
+	<title>{$titleHtml}Warladder.net</title>
 	<link rel="stylesheet" type="text/css" href="assets/css/bootstrap.min.css">
 	<link rel="stylesheet" type="text/css" href="assets/css/warladder.css">
 	<script src="assets/js/jquery-2.1.1.min.js"></script>
@@ -99,7 +99,7 @@ function renderMenu($menuLeft, $menuRight, $activeItem)
 				<span class="icon-bar"></span>
 				<span class="icon-bar"></span>
 			</button>
-			<a class="navbar-brand" href="index.php">Warladder</a>
+			<a class="navbar-brand" href="index.php">Warladder.net</a>
 		</div>
 	
 		<div class="collapse navbar-collapse" id="header-navbar-collapse-1">
