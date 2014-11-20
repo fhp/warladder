@@ -3,9 +3,14 @@
 require_once("common.php");
 
 
-$joinLink = "";
+$subtext = "";
 if(!isLoggedIn()) {
-	$joinLink .= "<p><a class=\"btn btn-lg btn-primary\" href=\"{$config["loginUrl"]}\" role=\"button\">Join today</a></p>";
+	$subtext = <<<TEXT
+<p>On this platform, you can play and organize warlight ladders.</p>
+
+TEXT;
+
+	$subtext .= "<p><a class=\"btn btn-lg btn-primary\" href=\"{$config["loginUrl"]}\" role=\"button\">Join today</a></p>";
 }
 
 $openLaddersHtml = renderOpenLadders("Open ladders", 0, 10);
@@ -34,6 +39,5 @@ HTML;
 	$html .= $openLaddersHtml;
 }
 
-$subtitle = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vestibulum ullamcorper ante nec maximus aliquet. In tincidunt, augue et varius commodo, erat tellus mattis libero, in porta est ipsum eu neque. Class aptent taciti sociosqu ad litora torquent per conubia nostra, per inceptos himenaeos. In vel dapibus mi. Praesent nec ligula venenatis, tempor enim ut, aliquam lectus. Sed efficitur faucibus lobortis. Suspendisse eleifend lacinia tortor non porta.";
 
-page($html, "home", "Warlight custom ladders", null, "<p>$subtitle</p>$joinLink");
+page($html, "home", "Warladder.net", "Warlight ladder platform", $subtext);
