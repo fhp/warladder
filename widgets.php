@@ -22,16 +22,21 @@ function renderOpenLadders($title, $from, $count, $page = null)
 function renderMyLadders($userID, $title, $from, $count, $page = null)
 {
 	$userIDSql = db()->addSlashes($userID);
-	$query = "SELECT ladderID, name, summary, rank "
+	$query = "SELECT ladderID, name, summary, rank, joinStatus "
 		. "FROM ladders INNER JOIN ladderPlayers USING(ladderID) "
-		. "WHERE ladderPlayers.userID = '$userIDSql' AND ladderPlayers.active = 1 AND ladders.active = 1 "
+		. "WHERE ladderPlayers.userID = '$userIDSql' AND ladderPlayers.active = 1 AND ladders.active = 1 AND (ladderPlayers.joinStatus = 'JOINED' OR ladderPlayers.joinStatus = 'SIGNEDUP') "
 		. "ORDER BY ladderID DESC ";
 	
 	$render = function($ladder) use($userID) {
 		$nameHtml = htmlentities($ladder["name"]);
 		$summaryHtml = htmlentities($ladder["summary"]);
-		$rankingUrlHtml = htmlentities("ranking.php?ladder={$ladder["ladderID"]}&player=$userID");
-		return "<tr><td><a href=\"ladder.php?ladder={$ladder["ladderID"]}\">$nameHtml</a></td><td>$summaryHtml</td><td><a href=\"$rankingUrlHtml\">{$ladder["rank"]}</a></td></tr>\n";
+		if ($ladder["joinStatus"] == "JOINED") {
+			$rankingUrlHtml = htmlentities("ranking.php?ladder={$ladder["ladderID"]}&player=$userID");
+			$rankHtml = "<a href=\"$rankingUrlHtml\">{$ladder["rank"]}</a>";
+		} else if ($ladder["joinStatus"] == "SIGNEDUP") {
+			$rankHtml = "<em>Waiting for approval</em>";
+		}
+		return "<tr><td><a href=\"ladder.php?ladder={$ladder["ladderID"]}\">$nameHtml</a></td><td>$summaryHtml</td><td>$rankHtml</td></tr>\n";
 	};
 	
 	return renderLongtable($title, "You are not currently playing on any ladders.", "ladders my-ladders", array("Name", "Description", "Rank"), $query, $render, "myladders.php", 50, $page, $from, $count);
