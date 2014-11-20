@@ -178,7 +178,7 @@ function renderCell($cell, $values, $readOnly)
 		$value = isset($values[$oldName]) ? $values[$oldName] : null;
 		$valueHtml = $value === null ? null : htmlentities($value);
 	}
-	$fieldclass = isset($cell["fieldclass"]) ? $cell["fieldclass"] : "form-control";
+	$fieldclass = isset($cell["fieldclass"]) ? $cell["fieldclass"] : ($cell["type"] == "checkbox" || $cell["type"] == "radio" ? null : "form-control");
 	
 	if($cell["type"] == "html") {
 		$output["content"] = "";

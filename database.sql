@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 17, 2014 at 12:03 AM
+-- Generation Time: Nov 21, 2014 at 12:31 AM
 -- Server version: 5.5.40
--- PHP Version: 5.4.34-0+deb7u1
+-- PHP Version: 5.4.35-0+deb7u2
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS `ladderChat` (
   KEY `ladderID` (`ladderID`),
   KEY `userID` (`userID`),
   KEY `timestamp` (`timestamp`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=63 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -88,7 +88,7 @@ CREATE TABLE IF NOT EXISTS `ladderGames` (
   KEY `templateID` (`templateID`),
   KEY `winningUserID` (`winningUserID`),
   KEY `ladderID_2` (`ladderID`,`startTime`,`status`,`endTime`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=299 ;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 AUTO_INCREMENT=1 ;
 
 -- --------------------------------------------------------
 
@@ -107,6 +107,7 @@ CREATE TABLE IF NOT EXISTS `ladderPlayers` (
   `active` tinyint(1) NOT NULL,
   `simultaneousGames` int(11) NOT NULL,
   `joinTime` int(11) NOT NULL,
+  `emailInterval` enum('NEVER','DAILY','WEEKLY','MONTHLY') NOT NULL,
   PRIMARY KEY (`userID`,`ladderID`),
   KEY `ladderID` (`ladderID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
@@ -141,7 +142,7 @@ CREATE TABLE IF NOT EXISTS `ladderTemplates` (
   `ladderID` int(11) NOT NULL,
   `warlightTemplateID` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  PRIMARY KEY (`templateID`,`ladderID`),
+  PRIMARY KEY (`templateID`),
   UNIQUE KEY `ladderID` (`ladderID`,`templateID`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
 

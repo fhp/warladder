@@ -226,24 +226,25 @@ function renderLongtable($title, $emptyMessage, $class, $header, $query, $render
 	return $output;
 }
 
-function renderEditTable($title, $emptyMessage, $class, $header, $query, $render, $formAction, $addRow)
+function renderEditTable($emptyMessage, $class, $header, $query, $render, $formAction, $addRow)
 {
-	$titleHtml = htmlentities($title);
-	
 	$items = db()->query($query)->fetchList();
 	$itemCount = count($items);
 	
 	$output = "";
-	$output .= "<form action=\"$formAction\" method=\"post\">\n";
+	if ($formAction !== null) {
+		$output .= "<form action=\"$formAction\" method=\"post\">\n";
+	}
 	$output .= "<div class=\"panel panel-default $class\">\n";
-//	$output .= "<div class=\"panel-heading\">$title</div>\n";
 	$output .= "<table class=\"table table-condensed\">\n";
 	$output .= "<thead><tr>";
 	$first = true;
 	foreach($header as $head) {
 		$output .= "<th>$head";
 		if($first) {
-			$output .= "<input type=\"submit\" style=\"visibility: hidden; height: 0px; width: 0px\" />";
+			if ($formAction !== null) {
+				$output .= "<input type=\"submit\" style=\"visibility: hidden; height: 0px; width: 0px\" />";
+			}
 			$first = false;
 		}
 		$output .= "</th>";
@@ -258,11 +259,15 @@ function renderEditTable($title, $emptyMessage, $class, $header, $query, $render
 			$output .= $render($item) . "\n";
 		}
 	}
-	$output .= "$addRow\n";
+	if ($addRow !== null) {
+		$output .= "$addRow\n";
+	}
 	$output .= "</tbody>\n";
 	$output .= "</table>\n";
 	$output .= "</div>\n";
-	$output .= "</form>\n";
+	if ($formAction !== null) {
+		$output .= "</form>\n";
+	}
 	return $output;
 }
 

@@ -30,8 +30,18 @@ tr.highlight {
 	padding-left: 4px;
 	padding-right: 10px;
 }
+.operation th[rowspan]{
+	vertical-align: top;
+}
 table .stretch {
 	width: 100%;
+}
+.operation label {
+	width: 100%;
+	font-weight: normal;
+}
+.nowrap {
+	white-space: nowrap;
 }
 .operation table td input {
 	width: 100%;

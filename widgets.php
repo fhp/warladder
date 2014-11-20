@@ -8,7 +8,7 @@ function renderOpenLadders($title, $from, $count, $page = null)
 		. "WHERE visibility = 'PUBLIC' AND ladders.active = '1' "
 		. "AND joinStatus = 'JOINED' AND ladderPlayers.active = '1' "
 		. "GROUP BY ladderID, name, summary "
-		. "ORDER BY ladderID DESC ";
+		. "ORDER BY players DESC ";
 	
 	$render = function($ladder) {
 		$nameHtml = htmlentities($ladder["name"]);
@@ -25,7 +25,7 @@ function renderMyLadders($userID, $title, $from, $count, $page = null)
 	$query = "SELECT ladderID, name, summary, rank, joinStatus "
 		. "FROM ladders INNER JOIN ladderPlayers USING(ladderID) "
 		. "WHERE ladderPlayers.userID = '$userIDSql' AND ladderPlayers.active = 1 AND ladders.active = 1 AND (ladderPlayers.joinStatus = 'JOINED' OR ladderPlayers.joinStatus = 'SIGNEDUP') "
-		. "ORDER BY ladderID DESC ";
+		. "ORDER BY name ASC ";
 	
 	$render = function($ladder) use($userID) {
 		$nameHtml = htmlentities($ladder["name"]);
@@ -189,7 +189,7 @@ function renderLadderTemplates($ladderID, $formAction, $nameField, $templateIDFi
 		return "<tr><td>$nameHtml</td><td><a href=\"http://warlight.net/MultiPlayer?TemplateID={$template["warlightTemplateID"]}\">{$template["warlightTemplateID"]}</a></td><td>$deleteHtml</td></tr>\n";
 	};
 	
-	return renderEditTable("Templates", "No templates are configured for this ladder yet.", "laddertemplatelist", array("Name", "ID", ""), $query, $render, $formAction,
+	return renderEditTable("No templates are configured for this ladder yet.", "laddertemplatelist templates", array("Name", "ID", ""), $query, $render, $formAction,
 		"<tr><td><input type=\"text\" name=\"$nameField\" class=\"stretch\" /></td><td><input type=\"text\" name=\"$templateIDField\" class=\"stretch\" /></td><td><input type=\"hidden\" name=\"action\" value=\"$action\" /><input type=\"submit\" value=\"Add Template\" class=\"btn btn-default form-control\" /></td></tr>");
 }
 
@@ -211,6 +211,25 @@ function renderLadderMods($ladderID, $formAction, $userIDField, $action)
 		$options .= "<option value=\"{$user["userID"]}\">$nameHtml</option>\n";
 	}
 	
-	return renderEditTable("Ladder moderators", "This ladder doesn't have any moderators.", "laddermodlist", array("Name", ""), $query, $render, $formAction,
+	return renderEditTable("This ladder doesn't have any moderators.", "laddermodlist mods", array("Name", ""), $query, $render, $formAction,
 		"<tr><td><select name=\"$userIDField\" class=\"form-control stretch\">$options</select></td><td><input type=\"hidden\" name=\"action\" value=\"$action\" /><input type=\"submit\" value=\"Add Moderator\" class=\"btn btn-default form-control\" /></td></tr>");
 }
+
+function renderMyLadderSettings($userID)
+{
+	$userIDSql = db()->addSlashes($userID);
+	$query = "SELECT ladderID, name, summary "
+		. "FROM ladders INNER JOIN ladderPlayers USING(ladderID) "
+		. "WHERE ladderPlayers.userID = '$userIDSql' AND ladderPlayers.active = 1 AND ladders.active = 1 "
+		. "ORDER BY name ASC ";
+	
+	$render = function($ladder) use($userID) {
+		$nameHtml = htmlentities($ladder["name"]);
+		$summaryHtml = htmlentities($ladder["summary"]);
+		$settingsUrlHtml = htmlentities("mysettings.php?ladder={$ladder["ladderID"]}");
+		return "<tr><td><a href=\"$settingsUrlHtml\">$nameHtml</a></td><td>$summaryHtml</td></tr>\n";
+	};
+	
+	return renderEditTable("You are not currently playing on any ladders.", "laddersettingslist ladders", array("Name", "Description"), $query, $render, null, null);
+}
+
