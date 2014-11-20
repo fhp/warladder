@@ -127,7 +127,7 @@ function renderMenuItems($items, $activeItem)
 
 function formError($error)
 {
-	return "<div class=\"alert alert-warning\" role=\"alert\">$error</div>\n";
+	return "<div class=\"alert alert-warning\">$error</div>\n";
 }
 
 

@@ -10,8 +10,12 @@ checkLadderMod($ladderID);
 $ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
 $ladderNameHtml = htmlentities($ladderName);
 
+$removeModeratorError = "";
+
 $change_settings_messages = array();
 $change_settings_error = "";
+
+$addTemplateError = "";
 
 $html = "";
 
@@ -19,8 +23,9 @@ if (($removeTemplate = post("remove-template")) !== null) {
 	// TODO: confirm
 	db()->stdDel("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$removeTemplate));
 } else if (($removeAdmin = post("remove-admin")) !== null) {
-	// TODO: confirm
-	if($removeAdmin != currentUserID() && isMod($ladderID, $removeAdmin)) {
+	if ($removeAdmin == currentUserID()) {
+		$removeModeratorError = formError("You cannot remove yourself as a moderator.");
+	} else if (isMod($ladderID, $removeAdmin)) {
 		db()->stdDel("ladderAdmins", array("userID"=>$removeAdmin, "ladderID"=>$ladderID));
 	}
 } else if(($action = post("action")) !== null) {
@@ -116,8 +121,13 @@ $ladderNameHtml = htmlentities($ladderName);
 		} else {
 			$templateID = (int)substr($template, strrpos($template, "=") + 1);
 		}
-		if($templateID != 0 && strlen($name) > 0) {
-			// TODO: checken of de templateID al bestaat in de database
+		if ($templateID == 0) {
+			$addTemplateError = formError("Invalid template ID.");
+		} else if ($name == "") {
+			// do nothing
+		} else if (db()->stdExists("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>$templateID))) {
+			$addTemplateError = formError("This template is already in use on this ladder.");
+		} else {
 			db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>$templateID, "name"=>$name));
 		}
 	}
@@ -166,6 +176,7 @@ $html .= operationForm("modladder.php?ladder=$ladderID", $change_settings_error,
 
 $html .= "<div class=\"ladder-templates\">\n";
 $html .= "<h2>Templates</h2>\n";
+$html .= $addTemplateError;
 $html .= "<p>Those are the games that can be played on this ladder. Players can choose which of these templates they like to play.</p>";
 $html .= renderLadderTemplates($ladderID, "modladder.php?ladder=$ladderID", "templateName", "template", "add-template");
 $html .= "</div>\n";
@@ -174,6 +185,7 @@ $html .= "</div>\n";
 
 $html .= "<div class=\"ladder-moderators\">\n";
 $html .= "<h2>Moderators</h2>\n";
+$html .= $removeModeratorError;
 $html .= "<p>Moderators can change ladder settings, ban players, and accept new recruits.</p>\n";
 $html .= renderLadderMods($ladderID, "modladder.php?ladder=$ladderID", "userID", "add-moderator");
 $html .= "</div>\n";

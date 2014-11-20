@@ -54,7 +54,7 @@ HTML;
 
 $html .= <<<HTML
 <div class="panel panel-default chat">
-	<div class="panel-heading">Ladder Chat</div>
+	<div class="panel-heading"><h3>Ladder Chat</h3></div>
 	<table class="table table-condensed" id="chatLines"></table>
 	<div class="panel-footer enterChat">
 		<form id="chatForm"><table><tr>

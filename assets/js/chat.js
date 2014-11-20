@@ -19,12 +19,21 @@ function LadderChat(ladderID)
 	renderChat = function(lines) {
 		var tbody = $('#chatLines tbody');
 		scroll = tbody.scrollTop() + tbody.height() == tbody.prop("scrollHeight");
+		
 		html = "";
 		$.each(lines, function(i, line) {
 			html += "<tr class=\"chatLine\"><td class=\"chatName\"><a href=\"player.php?ladder=" + ladderID + "&player=" + line["userID"] + "\">" + line["name"] + "</a></td><td class=\"stretch\">" + line["message"] + "</td></tr>";
 			lastUpdate = line["timestamp"];
 		});
 		$("#chatLines").append(html);
+		
+		if(lastUpdate === null) {
+			if($(".noChatLine").length == 0) {
+				$("#chatLines").append("<tr class=\"noChatLine\"><td class=\"stretch\" colspan=\"2\"><em>No chat messages.</em></td></tr>");
+			}
+		} else {
+			$(".noChatLine").remove();
+		}
 		
 		if(scroll) {
 			tbody.scrollTop(tbody.prop("scrollHeight"));
