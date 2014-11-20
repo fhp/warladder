@@ -73,7 +73,6 @@ if (($removeTemplate = post("remove-template")) !== null) {
 		}
 	}
 	if($action == "stop-ladder") {
-		// TODO: uitleg met implicaties van aan / uit zetten toevoegen.
 		if(post("confirm") == 1) {
 			db()->stdSet("ladders", array("ladderID"=>$ladderID), array("active"=>0));
 		} else {
