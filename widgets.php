@@ -16,7 +16,7 @@ function renderLongtable($title, $emptyMessage, $class, $header, $query, $render
 	
 	$output = "";
 	$output .= "<div class=\"panel panel-default $class\">\n";
-	$output .= "<div class=\"panel-heading\">$titleHtml</div>\n";
+	$output .= "<div class=\"panel-heading\"><h3>$titleHtml</h3></div>\n";
 	$output .= "<table class=\"table table-condensed\">\n";
 	$output .= "<thead><tr>";
 	foreach($header as $head) {
