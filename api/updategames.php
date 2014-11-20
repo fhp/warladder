@@ -56,6 +56,11 @@ function demoApiCreateGame($templateID, $gameName, $personalMessage, $players)
 	return $warlightGameID;
 }
 
+function demoApiGetUserTemplates($warlightUserID, $warlightTemplateIDs)
+{
+	return $warlightTemplateIDs;
+}
+
 
 
 
@@ -103,7 +108,6 @@ function finishGames($ladderID)
 	$ladderIDSql = db()->addSlashes($ladderID);
 	db()->setQuery("UPDATE ladderPlayers SET rank = 0 WHERE ladderID='$ladderIDSql' AND (active = 0 OR joinStatus <> 'JOINED')");
 	foreach($newScores as $userID => $score) {
-		var_dump($score);
 		db()->stdSet("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>$userID), $score);
 	}
 }
@@ -124,12 +128,28 @@ function describeRank($rank)
 
 function createGame($ladderID, $userID1, $userID2)
 {
-	$templates = db()->stdList("ladderTemplates", array("ladderID"=>$ladderID), "templateID");
+	$user1WarlightID = db()->stdGet("users", array("userID"=>$userID1), "warlightUserID");
+	$user2WarlightID = db()->stdGet("users", array("userID"=>$userID2), "warlightUserID");
+	
+	$templates = db()->stdMap("ladderTemplates", array("ladderID"=>$ladderID), "templateID", "warlightTemplateID");
+	
+	$user1Templates = demoApiGetUserTemplates($user1WarlightID, $templates);
+	$user2Templates = demoApiGetUserTemplates($user2WarlightID, $templates);
+	
+	$usableTemplates = array();
+	foreach($templates as $templateID => $warlightTemplateID) {
+		if (in_array($warlightTemplateID, $user1Templates) && 
+		    in_array($warlightTemplateID, $user2Templates))
+		{
+			$usableTemplates[$templateID] = $warlightTemplateID;
+		}
+	}
+	
 	$user1TemplateScores = db()->stdMap("playerLadderTemplates", array("userID"=>$userID1, "ladderID"=>$ladderID), "templateID", "score");
 	$user2TemplateScores = db()->stdMap("playerLadderTemplates", array("userID"=>$userID2, "ladderID"=>$ladderID), "templateID", "score");
 	
 	$scores = array();
-	foreach($templates as $templateID) {
+	foreach($usableTemplates as $templateID => $warlightTemplateID) {
 		$user1Score = (isset($user1TemplateScores[$templateID]) ? $user1TemplateScores[$templateID] : 1);
 		$user2Score = (isset($user2TemplateScores[$templateID]) ? $user2TemplateScores[$templateID] : 1);
 		$scores[$templateID] = $user1Score + $user2Score;
@@ -139,6 +159,8 @@ function createGame($ladderID, $userID1, $userID2)
 	reset($scores);
 	list($templateID, $score) = each($scores);
 	$templateName = db()->stdGet("ladderTemplates", array("templateID"=>$templateID), "name");
+	
+	
 	
 	db()->startTransaction();
 	$gameID = db()->stdNew("ladderGames", array("ladderID"=>$ladderID, "templateID"=>$templateID, "warlightGameID"=>null, "name"=>null, "status"=>"RUNNING", "winningUserID"=>null, "startTime"=>time(), "endTime"=>null));
@@ -163,8 +185,7 @@ Contender 2: $userName2 (Ranked $rank2 with a rating of {$user2["rating"]})
 Settings: $templateName
 DESC;
 	
-	$warlightTemplateID = db()->stdGet("ladderTemplates", array("templateID"=>$templateID), "warlightTemplateID");
-	$warlightGameID = demoApiCreateGame($warlightTemplateID, $name, $description, array($userID1=>1, $userID2=>2));
+	$warlightGameID = demoApiCreateGame($templates[$templateID], $name, $description, array($user1WarlightID=>1, $user2WarlightID=>2));
 	if ($warlightGameID === null) {
 		db()->rollbackTransaction();
 		return false;

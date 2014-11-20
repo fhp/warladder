@@ -91,6 +91,35 @@ function apiGetUser($warlightUserID)
 	);
 }
 
+function apiGetUserTemplates($warlightUserID, $warlightTemplateIDs)
+{
+	$output = array();
+	$chunks = array_chunk($warlightTemplateIDs, 20);
+	foreach($chunks as $chunk) {
+		$json = apiPost("http://warlight.net/API/ValidateInviteToken", array("Token"=>$warlightUserID, "TemplateIDs"=>implode(",", $chunk)));
+		$response = json_decode($json);
+		if ($response === null) {
+			return null;
+		}
+		if (isset($response->error)) {
+			return null;
+		}
+		if (!isset($response->tokenIsValid)) {
+			return null;
+		}
+		foreach($chunk as $templateID) {
+			$variable = "template$templateID";
+			if (!isset($response->$variable)) {
+				return null;
+			}
+			if ($response->$variable->result == "CanUseTemplate") {
+				$output[] = $templateID;
+			}
+		}
+	}
+	return $output;
+}
+
 function apiGetGame($gameID)
 {
 	$json = apiPost("http://warlight.net/API/GameFeed", array("GameID"=>$gameID));
@@ -200,3 +229,6 @@ function apiCreateGame($templateID, $gameName, $personalMessage, $players)
 //var_dump(apiGetUser("1220997122"));
 
 //var_dump(apiCheckLogin("158790374", "rmjYedAQzJMpfan6"));
+
+//var_dump(apiGetUserTemplates("158790373", array(546673, 546680, 546690, 546697, 546700)));
+
