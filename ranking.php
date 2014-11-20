@@ -21,7 +21,7 @@ if (get("page") === null && $userID !== null) {
 
 
 if ($userID === null) {
-	$title = "$ladderNameHtml top players";
+	$title = "Top players";
 } else if ($userID == currentUserID()) {
 	$title = "Your rank";
 } else {
@@ -29,4 +29,4 @@ if ($userID === null) {
 	$title = "$userNameHtml's rank";
 }
 
-return page(renderRanking($ladderID, $title, "There don't seem to be any players on this ladder.", $userID, null, null, $page), "ranking");
+return page(renderRanking($ladderID, null, "There don't seem to be any players on this ladder.", $userID, null, null, $page), "ranking", $title, "<a href=\"ladder.php?ladder=$ladderID\">$ladderNameHtml</a>", null, $title . " - " . $ladderNameHtml);

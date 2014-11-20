@@ -7,4 +7,8 @@ $ladderID = $_GET["ladder"];
 
 checkLadderMod($ladderID);
 
-return page(renderAcceptList($ladderID, "Accept players", null, null, pageNumber()), "acceptlist");
+$ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
+$ladderNameHtml = htmlentities($ladderName);
+
+
+return page(renderAcceptList($ladderID, null, null, null, pageNumber()), "acceptlist", "New players", "<a href=\"ladder.php?ladder=$ladderID\">$ladderNameHtml</a>", "<p>These players want to join this ladder. As a moderator, you can either accept or reject them.</p>", "New players - $ladderNameHtml");

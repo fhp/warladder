@@ -903,7 +903,7 @@ function operationForm($postUrl, $error, $title, $submitCaption, $fields, $value
 	$output .= "</h2>\n";
 	
 	if($error === null) {
-		$output .= "<p class=\"confirm\">Confirm your input</p>\n";
+		$output .= "<p class=\"alert alert-warning\">Are you sure?</p>\n";
 		if(isset($messages["confirmdelete"])) {
 			$output .= "<p class=\"confirmdelete\">{$messages["confirmdelete"]}</p>\n";
 		}

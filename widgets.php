@@ -105,11 +105,17 @@ function renderEditTable($title, $emptyMessage, $class, $header, $query, $render
 	$output = "";
 	$output .= "<form action=\"$formAction\" method=\"post\">\n";
 	$output .= "<div class=\"panel panel-default $class\">\n";
-	$output .= "<div class=\"panel-heading\">$title<input type=\"submit\" style=\"visibility: hidden; height: 0px; width: 0px\" /></div>\n";
+//	$output .= "<div class=\"panel-heading\">$title</div>\n";
 	$output .= "<table class=\"table table-condensed\">\n";
 	$output .= "<thead><tr>";
+	$first = true;
 	foreach($header as $head) {
-		$output .= "<th>$head</th>";
+		$output .= "<th>$head";
+		if($first) {
+			$output .= "<input type=\"submit\" style=\"visibility: hidden; height: 0px; width: 0px\" />";
+			$first = false;
+		}
+		$output .= "</th>";
 	}
 	$output .= "</tr></thead>\n";
 	$output .= "<tbody>\n";
@@ -261,7 +267,7 @@ function renderLadderMods($ladderID, $formAction, $userIDField, $action)
 		$options .= "<option value=\"{$user["userID"]}\">$nameHtml</option>\n";
 	}
 	
-	return renderEditTable("Moderators can change ladder settings, ban players, and accept new recruits.", "This ladder doesn't have any moderators.", "laddermodlist", array("Name", ""), $query, $render, $formAction,
+	return renderEditTable("Ladder moderators", "This ladder doesn't have any moderators.", "laddermodlist", array("Name", ""), $query, $render, $formAction,
 		"<tr><td><select name=\"$userIDField\" class=\"form-control stretch\">$options</select></td><td><input type=\"hidden\" name=\"action\" value=\"$action\" /><input type=\"submit\" value=\"Add Moderator\" class=\"btn btn-default form-control\" /></td></tr>");
 }
 

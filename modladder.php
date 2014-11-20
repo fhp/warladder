@@ -7,14 +7,13 @@ $ladderID = $_GET["ladder"];
 
 checkLadderMod($ladderID);
 
+$ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
+$ladderNameHtml = htmlentities($ladderName);
+
 $change_settings_messages = array();
 $change_settings_error = "";
 
-$html = <<<HTML
-<h1>Ladder Configuration</h1>
-<p>Change the settings for the ladder here!</p>
-
-HTML;
+$html = "";
 
 if (($removeTemplate = post("remove-template")) !== null) {
 	// TODO: confirm
@@ -59,16 +58,16 @@ if (($removeTemplate = post("remove-template")) !== null) {
 		}
 		if($change_settings_error == "") {
 			db()->stdSet("ladders", array("ladderID"=>$ladderID), $values);
-			$change_settings_messages["custom"] = "<div class=\"alert alert-success\" role=\"alert\"><strong>Success!</strong> The preferences are saved.</div>";
+			$change_settings_messages["custom"] = "<div class=\"alert alert-success\" role=\"alert\">Settings saved.</div>";
 		}
 	}
 	if($action == "start-ladder") {
 		if(post("confirm") == 1) {
 			db()->stdSet("ladders", array("ladderID"=>$ladderID), array("active"=>1));
 		} else {
-			$html .= operationForm("modladder.php?ladder=$ladderID", null, "Start Ladder", "start", array(
+			$html .= operationForm("modladder.php?ladder=$ladderID", null, "Start Ladder", "Start", array(
 				array("type"=>"hidden", "name"=>"action", "value"=>"start-ladder"),
-			), null);
+			), null, array("custom"=>"<p>This will activate the ladder, allowing players to join and play games.</p>"));
 			page($html, "modladder");
 			die();
 		}
@@ -78,9 +77,9 @@ if (($removeTemplate = post("remove-template")) !== null) {
 		if(post("confirm") == 1) {
 			db()->stdSet("ladders", array("ladderID"=>$ladderID), array("active"=>0));
 		} else {
-			$html .= operationForm("modladder.php?ladder=$ladderID", null, "Stop Ladder", "stop", array(
+			$html .= operationForm("modladder.php?ladder=$ladderID", null, "Deactivate Ladder", "Deactivate", array(
 				array("type"=>"hidden", "name"=>"action", "value"=>"stop-ladder"),
-			), null);
+			), null, array("custom"=>"<p>This will deactivate the ladder. New games will no longer be created, and players cannot join the ladder anymore.</p>"));
 			page($html, "modladder");
 			die();
 		}
@@ -88,7 +87,9 @@ if (($removeTemplate = post("remove-template")) !== null) {
 	if($action == "add-moderator") {
 		$newModID = post("userID");
 		if(!isMod($ladderID, $newModID)) {
-			db()->stdNew("ladderAdmins", array("userID"=>$newModID, "ladderID"=>$ladderID));
+			db()->stdNew("ladderAdmins", array("userID"=>$newModID, "ladderID"=>$ladderID));$ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
+$ladderNameHtml = htmlentities($ladderName);
+
 		}
 	}
 	if($action == "ban-player") {
@@ -125,10 +126,19 @@ if (($removeTemplate = post("remove-template")) !== null) {
 
 
 
+if(db()->stdGet("ladders", array("ladderID"=>$ladderID), "active") == 0) {
+	$html .= operationForm("modladder.php?ladder=$ladderID", "", "Start Ladder", "Start", array(
+		array("type"=>"hidden", "name"=>"action", "value"=>"start-ladder"),
+	), null, array("custom"=>"<p>This will activate the ladder, allowing players to join and play games.</p>"));
+}
+
+
+
 if(db()->stdGet("ladders", array("ladderID"=>$ladderID), "accessibility") == "MODERATED") {
 	$html .= "<div class=\"accept-players\">\n";
 	$html .= "<h2>Joining Players</h2>\n";
-	$html .= renderAcceptList($ladderID, "These players want to join this ladder. As a moderator, you can either accept or reject them.", 0, 10);
+	$html .= "<p>These players want to join this ladder. As a moderator, you can either accept or reject them.</p>";
+	$html .= renderAcceptList($ladderID, "New players", 0, 10);
 	$html .= "</div>\n";
 }
 
@@ -138,7 +148,7 @@ if($change_settings_error == "") {
 	$values = db()->stdGet("ladders", array("ladderID"=>$ladderID), array("name", "summary", "message", "accessibility", "visibility", "minSimultaneousGames", "maxSimultaneousGames"));
 }
 
-$html .= operationForm("modladder.php?ladder=$ladderID", $change_settings_error, "Ladder Settings", "save", array(
+$html .= operationForm("modladder.php?ladder=$ladderID", $change_settings_error, "Ladder Settings", "Save", array(
 	array("type"=>"hidden", "name"=>"action", "value"=>"change-settings"),
 	array("title"=>"Name", "type"=>"text", "name"=>"name"),
 	array("title"=>"Summary", "type"=>"text", "name"=>"summary"),
@@ -157,6 +167,7 @@ $html .= operationForm("modladder.php?ladder=$ladderID", $change_settings_error,
 
 $html .= "<div class=\"ladder-templates\">\n";
 $html .= "<h2>Templates</h2>\n";
+$html .= "<p>Those are the games that can be played on this ladder. Players can choose which of these templates they like to play.</p>";
 $html .= renderLadderTemplates($ladderID, "modladder.php?ladder=$ladderID", "templateName", "template", "add-template");
 $html .= "</div>\n";
 
@@ -164,25 +175,18 @@ $html .= "</div>\n";
 
 $html .= "<div class=\"ladder-moderators\">\n";
 $html .= "<h2>Moderators</h2>\n";
+$html .= "<p>Moderators can change ladder settings, ban players, and accept new recruits.</p>\n";
 $html .= renderLadderMods($ladderID, "modladder.php?ladder=$ladderID", "userID", "add-moderator");
 $html .= "</div>\n";
 
 
 
-// warlight.net/MultiPlayer?TemplateID=546673
-
-
-// TODO: betere namen, mogelijk start-knop bovenaan de pagina.
-if(db()->stdGet("ladders", array("ladderID"=>$ladderID), "active") == 0) {
-	$html .= operationForm("modladder.php?ladder=$ladderID", "", "Start Ladder", "start", array(
-		array("type"=>"hidden", "name"=>"action", "value"=>"start-ladder"),
-	), null);
-} else {
-	$html .= operationForm("modladder.php?ladder=$ladderID", "", "Stop Ladder", "stop", array(
+if(!db()->stdGet("ladders", array("ladderID"=>$ladderID), "active") == 0) {
+	$html .= operationForm("modladder.php?ladder=$ladderID", "", "Deactivate Ladder", "Deactivate", array(
 		array("type"=>"hidden", "name"=>"action", "value"=>"stop-ladder"),
-	), null);
+	), null, array("custom"=>"<p>This will deactivate the ladder. New games will no longer be created, and players cannot join the ladder anymore.</p>"));
 }
 
-page($html, "modladder");
 
-?>
+
+page($html, "modladder", "Ladder configuration", "<a href=\"ladder.php?ladder=$ladderID\">$ladderNameHtml</a>", null, "Ladder configuration - $ladderNameHtml");
