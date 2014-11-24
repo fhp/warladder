@@ -9,8 +9,8 @@ if(!apiCheckLogin(get("token"), get("clotpass"))) {
 $warlightUserID = get("token");
 
 if(!db()->stdExists("users", array("warlightUserID"=>$warlightUserID))) {
-	$user = apiGetUser($warlightUserID);
-	db()->stdNew("users", array("warlightUserID"=>$warlightUserID, "name"=>$user["name"], "color"=>$user["color"]));
+	$_SESSION["token"] = $warlightUserID;
+	redirect("register.php");
 }
 
 $_SESSION["userID"] = db()->stdGet("users", array("warlightUserID"=>$warlightUserID), "userID");
