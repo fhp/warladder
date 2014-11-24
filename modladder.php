@@ -67,6 +67,7 @@ if (($removeTemplate = post("remove-template")) !== null) {
 		}
 	}
 	if($action == "start-ladder") {
+		// TODO: check of er templates zijn.
 		if(post("confirm") == 1) {
 			db()->stdSet("ladders", array("ladderID"=>$ladderID), array("active"=>1));
 		} else {
