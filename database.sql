@@ -3,9 +3,9 @@
 -- http://www.phpmyadmin.net
 --
 -- Host: localhost
--- Generation Time: Nov 21, 2014 at 12:31 AM
--- Server version: 5.5.40
--- PHP Version: 5.4.35-0+deb7u2
+-- Generation Time: Dec 05, 2014 at 01:33 AM
+-- Server version: 5.5.38
+-- PHP Version: 5.4.34-0+deb7u1
 
 SET SQL_MODE="NO_AUTO_VALUE_ON_ZERO";
 SET time_zone = "+00:00";
@@ -144,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `ladderTemplates` (
   `name` varchar(255) NOT NULL,
   PRIMARY KEY (`templateID`),
   UNIQUE KEY `ladderID` (`ladderID`,`templateID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=3 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=4 ;
 
 -- --------------------------------------------------------
 
@@ -157,6 +157,7 @@ CREATE TABLE IF NOT EXISTS `playerLadderTemplates` (
   `ladderID` int(11) NOT NULL,
   `templateID` int(11) NOT NULL,
   `score` int(11) NOT NULL,
+  `canPlay` tinyint(1) NOT NULL,
   PRIMARY KEY (`userID`,`ladderID`,`templateID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
@@ -172,9 +173,10 @@ CREATE TABLE IF NOT EXISTS `users` (
   `name` varchar(255) NOT NULL,
   `color` varchar(12) NOT NULL,
   `email` varchar(255) DEFAULT NULL,
+  `emailConfirmation` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`userID`),
   UNIQUE KEY `warlightUserID` (`warlightUserID`)
-) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=103 ;
+) ENGINE=InnoDB  DEFAULT CHARSET=latin1 AUTO_INCREMENT=102 ;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
