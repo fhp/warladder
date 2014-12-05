@@ -20,8 +20,19 @@ $addTemplateError = "";
 $html = "";
 
 if (($removeTemplate = post("remove-template")) !== null) {
-	// TODO: confirm
-	db()->stdDel("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$removeTemplate));
+	// TODO: checks
+	
+	
+	if(post("confirm") == 1) {
+		db()->stdDel("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$removeTemplate));
+	} else {
+		$templateNameHtml = htmlentities(db()->stdGet("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$removeTemplate), "name"));
+		$html .= operationForm("modladder.php?ladder=$ladderID", null, "Remove template", "Remove template", array(
+			array("type"=>"hidden", "name"=>"remove-template", "value"=>post("remove-template")),
+		), null, array("custom"=>"<p>This remove the template <i>$templateNameHtml</i> from this ladder.</p>"));
+		page($html, "modladder");
+		die();
+	}
 } else if (($removeAdmin = post("remove-admin")) !== null) {
 	if ($removeAdmin == currentUserID()) {
 		$removeModeratorError = formError("You cannot remove yourself as a moderator.");
@@ -92,9 +103,7 @@ if (($removeTemplate = post("remove-template")) !== null) {
 	if($action == "add-moderator") {
 		$newModID = post("userID");
 		if(!isMod($ladderID, $newModID)) {
-			db()->stdNew("ladderAdmins", array("userID"=>$newModID, "ladderID"=>$ladderID));$ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
-$ladderNameHtml = htmlentities($ladderName);
-
+			db()->stdNew("ladderAdmins", array("userID"=>$newModID, "ladderID"=>$ladderID));
 		}
 	}
 	if($action == "ban-player") {
