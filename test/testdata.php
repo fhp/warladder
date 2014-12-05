@@ -14,7 +14,7 @@ db()->setQuery("TRUNCATE users;");
 
 $ladderID = 1337;
 db()->stdNew("ladders", array("ladderID"=>$ladderID, "name"=>"Test ladder", "summary"=>"Alleen om te testen", "message"=>"Doe mee met deze ladder als je warladder wilt testen.\n\nDat is heel erg leuk namelijk!", "accessibility"=>"PUBLIC", "visibility"=>"PUBLIC", "active"=>1, "minSimultaneousGames"=>1, "maxSimultaneousGames"=>5));
-$templateID = db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>"12345", "name"=>"Demo template"));
+$templateID = db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>"546673", "name"=>"Demo template"));
 
 $score = tsDefaultScore();
 for($i = 1; $i <= 100; $i++) {

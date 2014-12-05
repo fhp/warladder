@@ -63,11 +63,31 @@ function currentUserID()
 	return $_SESSION["userID"];
 }
 
-function requireLogin()
+function requireLogin($target = null)
 {
 	if(!isLoggedIn()) {
-		redirect("index.php");
+		if ($target === null) {
+			redirect("index.php");
+		} else {
+			redirect($GLOBALS["config"]["loginUrl"] . "&state=" . urlencode($target));
+		}
 	}
+}
+
+function requireAuthentication($target)
+{
+	if (!isset($_SESSION["token"])) {
+		if ($target === null) {
+			redirect($GLOBALS["config"]["loginUrl"]);
+		} else {
+			redirect($GLOBALS["config"]["loginUrl"] . "&state=" . urlencode($target));
+		}
+	}
+}
+
+function startsWith($string, $prefix)
+{
+	return substr($string, 0, strlen($prefix)) === $prefix;
 }
 
 function error404()

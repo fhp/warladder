@@ -5,19 +5,24 @@ require_once("common.php");
 $ladderID = get("ladder");
 checkLadder($ladderID);
 
-requireLogin();
+requireAuthentication("joinladder.php?ladder=$ladderID");
 
-if(db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
+if (isLoggedIn() && db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
 	redirect("ladder.php?ladder=$ladderID");
 }
 
 $ladder_error = "";
 
-$warlightUserID = db()->stdGet("users", array("userID"=>currentUserID()), "warlightUserID");
+if (isLoggedIn()) {
+	$warlightUserID = db()->stdGet("users", array("userID"=>currentUserID()), "warlightUserID");
+} else {
+	$warlightUserID = $_SESSION["token"];
+}
+
 $warlightTemplateIDs = db()->stdList("ladderTemplates", array("ladderID"=>$ladderID), "warlightTemplateID");
 
 if(count(apiGetUserTemplates($warlightUserID, $warlightTemplateIDs)) == 0) {
-	$ladder_error .= formError("You're warlight level is too low to play on this ladder.");
+	$ladder_error .= formError("Your warlight level is too low to play on this ladder.");
 }
 
 if(($action = post("action")) !== null) {
@@ -48,8 +53,13 @@ if(($action = post("action")) !== null) {
 		}
 		
 		if($ladder_error == "") {
-			$score = tsDefaultScore();
+			if (!isLoggedIn()) {
+				$warlightUserID = $_SESSION["token"];
+				$user = apiGetUser($warlightUserID);
+				$_SESSION["userID"] = db()->stdNew("users", array("warlightUserID"=>$warlightUserID, "name"=>$user["name"], "color"=>$user["color"], "email"=>post("email") == "" ? null : post("email")));
+			}
 			$userID = currentUserID();
+			$score = tsDefaultScore();
 			
 			$values["ladderID"] = $ladderID;
 			$values["userID"] = currentUserID();
@@ -104,6 +114,8 @@ foreach(db()->stdList("ladderTemplates", array("ladderID"=>$ladderID), array("te
 
 $html .= operationForm("joinladder.php?ladder=$ladderID", $ladder_error, "Ladder Settings", "Join", array(
 	array("type"=>"hidden", "name"=>"action", "value"=>"ladder-settings"),
+	(isLoggedIn() ? null : array("title"=>"Email", "type"=>"text", "name"=>"email")),
+	(isLoggedIn() ? null : array("title"=>"", "type"=>"html", "html"=>"<p><em>Optional. We use this to mail you up-to-date ladder standings, if you enable them below.</em></p>")),
 	($ladderInfo["minSimultaneousGames"] == $ladderInfo["maxSimultaneousGames"] ?
 		array("type"=>"hidden", "name"=>"simultaneousGames", "value"=>$ladderInfo["minSimultaneousGames"])
 	:

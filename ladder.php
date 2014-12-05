@@ -9,7 +9,9 @@ $html = "";
 
 $ladder = db()->stdGet("ladders", array("ladderID"=>$ladderID), array("name", "summary", "message"));
 
-if(isLoggedIn() && !db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
+$ladderMessageHtml = "<p>" . nl2br(htmlentities($ladder["message"])) . "</p>";
+
+if (!isLoggedIn() || !db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
 	$ladderOperationHtml = <<<HTML
 <p><a href="joinladder.php?ladder={$ladderID}" class="btn btn-lg btn-primary">Join this ladder</a></p>
 HTML;
@@ -19,6 +21,10 @@ HTML;
 HTML;
 } else {
 	$ladderOperationHtml = "";
+}
+
+if ($ladderOperationHtml != "") {
+	$ladderMessageHtml = "<div class=\"row\"><div class=\"col-md-10\">$ladderMessageHtml</div><div class=\"col-md-2\">$ladderOperationHtml</div></div>";
 }
 
 $topRankingHtml = renderRanking($ladderID, "Top players", "There don't seem to be any players on this ladder.", null, 0, 10);
@@ -68,4 +74,4 @@ $html .= <<<HTML
 
 HTML;
 
-page($html, "ladder", $ladder["name"], htmlentities($ladder["summary"]), "<p>" . nl2br(htmlentities($ladder["message"])) . "</p>$ladderOperationHtml");
+page($html, "ladder", $ladder["name"], htmlentities($ladder["summary"]), $ladderMessageHtml);

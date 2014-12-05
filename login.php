@@ -7,12 +7,20 @@ if(!apiCheckLogin(get("token"), get("clotpass"))) {
 }
 
 $warlightUserID = get("token");
+$target = get("state");
 
 if(!db()->stdExists("users", array("warlightUserID"=>$warlightUserID))) {
 	$_SESSION["token"] = $warlightUserID;
+	if ($target !== null && startsWith($target, "joinladder.php")) {
+		redirect($target);
+	}
 	redirect("register.php");
 }
 
 $_SESSION["userID"] = db()->stdGet("users", array("warlightUserID"=>$warlightUserID), "userID");
 
-redirect("index.php");
+if ($target !== null) {
+	redirect($target);
+} else {
+	redirect("index.php");
+}
