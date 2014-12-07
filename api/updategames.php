@@ -133,26 +133,21 @@ function createGame($ladderID, $userID1, $userID2)
 	
 	$templates = db()->stdMap("ladderTemplates", array("ladderID"=>$ladderID), "templateID", "warlightTemplateID");
 	
-	$user1Templates = demoApiGetUserTemplates($user1WarlightID, $templates);
-	$user2Templates = demoApiGetUserTemplates($user2WarlightID, $templates);
+	$user1Templates = db()->stdMap("playerLadderTemplates", array("userID"=>$userID1, "ladderID"=>$ladderID, "canPlay"=>1), "templateID", "score");
+	$user2Templates = db()->stdMap("playerLadderTemplates", array("userID"=>$userID2, "ladderID"=>$ladderID, "canPlay"=>1), "templateID", "score");
 	
 	$usableTemplates = array();
 	foreach($templates as $templateID => $warlightTemplateID) {
-		if (in_array($warlightTemplateID, $user1Templates) && 
-		    in_array($warlightTemplateID, $user2Templates))
+		if (isset($user1Templates[$templateID]) && 
+		    isset($user2Templates[$templateID]))
 		{
 			$usableTemplates[$templateID] = $warlightTemplateID;
 		}
 	}
 	
-	$user1TemplateScores = db()->stdMap("playerLadderTemplates", array("userID"=>$userID1, "ladderID"=>$ladderID), "templateID", "score");
-	$user2TemplateScores = db()->stdMap("playerLadderTemplates", array("userID"=>$userID2, "ladderID"=>$ladderID), "templateID", "score");
-	
 	$scores = array();
 	foreach($usableTemplates as $templateID => $warlightTemplateID) {
-		$user1Score = (isset($user1TemplateScores[$templateID]) ? $user1TemplateScores[$templateID] : 1);
-		$user2Score = (isset($user2TemplateScores[$templateID]) ? $user2TemplateScores[$templateID] : 1);
-		$scores[$templateID] = $user1Score + $user2Score;
+		$scores[$templateID] = $user1Templates[$templateID] + $user2Templates[$templateID];
 	}
 	
 	arsort($scores);

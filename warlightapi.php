@@ -94,6 +94,9 @@ function apiGetUser($warlightUserID)
 function apiGetUserTemplates($warlightUserID, $warlightTemplateIDs)
 {
 	$output = array();
+	if(!is_array($warlightTemplateIDs)) {
+		$warlightTemplateIDs = array($warlightTemplateIDs);
+	}
 	$chunks = array_chunk($warlightTemplateIDs, 20);
 	foreach($chunks as $chunk) {
 		$json = apiPost("http://warlight.net/API/ValidateInviteToken", array("Token"=>$warlightUserID, "TemplateIDs"=>implode(",", $chunk)));

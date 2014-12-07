@@ -15,22 +15,60 @@ $removeModeratorError = "";
 $change_settings_messages = array();
 $change_settings_error = "";
 
+$removeTemplateError = "";
 $addTemplateError = "";
+
+$startError = "";
 
 $html = "";
 
 if (($removeTemplate = post("remove-template")) !== null) {
-	// TODO: checks
+	$templateIDSql = db()->addSlashes($removeTemplate);
+	$ladderIDSql = db()->addSlashes($ladderID);
 	
+	$sql = "SELECT userID, name, COUNT(templateCount.templateID) AS playableTemplates
+	FROM ladderPlayers
+	INNER JOIN users USING(userID)
+	LEFT JOIN (
+		SELECT userID, templateID
+		FROM playerLadderTemplates
+		WHERE templateID <> $templateIDSql
+		AND ladderID = $ladderIDSql
+		AND canPlay = 1
+	) AS templateCount USING(userID)
+	WHERE ladderID = $ladderIDSql
+	AND active = 1
+	AND joinStatus = 'JOINED'
+	GROUP BY userID
+	";
+	$templateCount = db()->query($sql)->fetchList();
 	
-	if(post("confirm") == 1) {
+	$zeroTemplatePlayers = array();
+	foreach($templateCount as $user) {
+		if($user["playableTemplates"] == 0) {
+			$zeroTemplatePlayers[] = $user["name"];
+		}
+	}
+	
+	$templateNameHtml = htmlentities(db()->stdGet("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$removeTemplate), "name"));
+	if(count($zeroTemplatePlayers) > 0) {
+		$error = "Template <i>$templateNameHtml</i> cannot be removed, as this would leave ";
+		if(count($zeroTemplatePlayers) > 10) {
+			$error .= count($zeroTemplatePlayers) . " players without playable templates. ";
+		} else {
+			$error .= "the following players without playable templates: ";
+			$error .= implode(",", $zeroTemplatePlayers) . ". ";
+		}
+		$error .= "<br>Please add another template first, or remove these players.";
+		$removeTemplateError = formError($error);
+	} else if(post("confirm") == 1) {
+		db()->stdDel("playerLadderTemplates", array("ladderID"=>$ladderID, "templateID"=>$removeTemplate));
 		db()->stdDel("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$removeTemplate));
 	} else {
-		$templateNameHtml = htmlentities(db()->stdGet("ladderTemplates", array("ladderID"=>$ladderID, "templateID"=>$removeTemplate), "name"));
 		$html .= operationForm("modladder.php?ladder=$ladderID", null, "Remove template", "Remove template", array(
 			array("type"=>"hidden", "name"=>"remove-template", "value"=>post("remove-template")),
 		), null, array("custom"=>"<p>This remove the template <i>$templateNameHtml</i> from this ladder.</p>"));
-		page($html, "modladder");
+		page($html, "modladder", "Ladder configuration - $ladderNameHtml", "Remove template");
 		die();
 	}
 } else if (($removeAdmin = post("remove-admin")) !== null) {
@@ -78,14 +116,15 @@ if (($removeTemplate = post("remove-template")) !== null) {
 		}
 	}
 	if($action == "start-ladder") {
-		// TODO: check of er templates zijn.
-		if(post("confirm") == 1) {
+		if(!db()->stdExists("ladderTemplates", array("ladderID"=>$ladderID))) {
+			$startError = formError("Please add templates to this ladder before starting.");
+		} else if(post("confirm") == 1) {
 			db()->stdSet("ladders", array("ladderID"=>$ladderID), array("active"=>1));
 		} else {
 			$html .= operationForm("modladder.php?ladder=$ladderID", null, "Start Ladder", "Start", array(
 				array("type"=>"hidden", "name"=>"action", "value"=>"start-ladder"),
 			), null, array("custom"=>"<p>This will activate the ladder, allowing players to join and play games.</p>"));
-			page($html, "modladder");
+			page($html, "modladder", "Ladder configuration - $ladderNameHtml", "Start ladder");
 			die();
 		}
 	}
@@ -96,7 +135,7 @@ if (($removeTemplate = post("remove-template")) !== null) {
 			$html .= operationForm("modladder.php?ladder=$ladderID", null, "Deactivate Ladder", "Deactivate", array(
 				array("type"=>"hidden", "name"=>"action", "value"=>"stop-ladder"),
 			), null, array("custom"=>"<p>This will deactivate the ladder. New games will no longer be created, and players cannot join the ladder anymore.</p>"));
-			page($html, "modladder");
+			page($html, "modladder", "Ladder configuration - $ladderNameHtml", "Deactivate Ladder");
 			die();
 		}
 	}
@@ -119,7 +158,7 @@ if (($removeTemplate = post("remove-template")) !== null) {
 				array("type"=>"hidden", "name"=>"action", "value"=>"ban-player"),
 				array("type"=>"hidden", "name"=>"userID", "value"=>$userID),
 			), null, array("custom"=>"<p class=\"alert alert-warning\"><b>Warning:</b> Are you sure you want to ban <b>$name</b> from this ladder?</p>"));
-			page($html, "modladder", null);
+			page($html, "modladder", "Ladder configuration - $ladderNameHtml", "Ban player");
 			die();
 		}
 	}
@@ -127,18 +166,30 @@ if (($removeTemplate = post("remove-template")) !== null) {
 		$template = post("template");
 		$name = post("templateName");
 		if(strpos($template, "TemplateID=") === false) {
-			$templateID = (int)$template;
+			$warlightTemplateID = (int)$template;
 		} else {
-			$templateID = (int)substr($template, strrpos($template, "=") + 1);
+			$warlightTemplateID = (int)substr($template, strrpos($template, "=") + 1);
 		}
-		if ($templateID == 0) {
+		if ($warlightTemplateID == 0) {
 			$addTemplateError = formError("Invalid template ID.");
 		} else if ($name == "") {
 			// do nothing
-		} else if (db()->stdExists("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>$templateID))) {
+		} else if (db()->stdExists("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>$warlightTemplateID))) {
 			$addTemplateError = formError("This template is already in use on this ladder.");
 		} else {
-			db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>$templateID, "name"=>$name));
+			$templateID = db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>$warlightTemplateID, "name"=>$name));
+			$ladderIDSql = db()->addSlashes($ladderID);
+			$players = db()->query("
+				SELECT userID, warlightUserID
+				FROM ladderPlayers
+				LEFT JOIN users USING(userID)
+				WHERE ladderID = $ladderIDSql
+			")->fetchList();
+			foreach($players as $player) {
+				$result = apiGetUserTemplates($player["warlightUserID"], $warlightTemplateID);
+				$canPlay = in_array($warlightTemplateID, $result);
+				db()->stdNew("playerLadderTemplates", array("userID"=>$player["userID"], "ladderID"=>$ladderID, "templateID"=>$templateID, "score"=>1, "canPlay"=>$canPlay));
+			}
 		}
 	}
 }
@@ -146,7 +197,7 @@ if (($removeTemplate = post("remove-template")) !== null) {
 
 
 if(db()->stdGet("ladders", array("ladderID"=>$ladderID), "active") == 0) {
-	$html .= operationForm("modladder.php?ladder=$ladderID", "", "Start Ladder", "Start", array(
+	$html .= operationForm("modladder.php?ladder=$ladderID", $startError, "Start Ladder", "Start", array(
 		array("type"=>"hidden", "name"=>"action", "value"=>"start-ladder"),
 	), null, array("custom"=>"<p>This will activate the ladder, allowing players to join and play games.</p>"));
 }
@@ -187,6 +238,7 @@ $html .= operationForm("modladder.php?ladder=$ladderID", $change_settings_error,
 $html .= "<div class=\"ladder-templates\">\n";
 $html .= "<h2>Templates</h2>\n";
 $html .= $addTemplateError;
+$html .= $removeTemplateError;
 $html .= "<p>Those are the games that can be played on this ladder. Players can choose which of these templates they like to play.</p>";
 $html .= renderLadderTemplates($ladderID, "modladder.php?ladder=$ladderID", "templateName", "template", "add-template");
 $html .= "</div>\n";

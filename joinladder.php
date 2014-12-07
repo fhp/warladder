@@ -20,8 +20,9 @@ if (isLoggedIn()) {
 }
 
 $warlightTemplateIDs = db()->stdList("ladderTemplates", array("ladderID"=>$ladderID), "warlightTemplateID");
+$playableTemplates = apiGetUserTemplates($warlightUserID, $warlightTemplateIDs);
 
-if(count(apiGetUserTemplates($warlightUserID, $warlightTemplateIDs)) == 0) {
+if(count($playableTemplates) == 0) {
 	$ladder_error .= formError("Your warlight level is too low to play on this ladder.");
 }
 
@@ -82,10 +83,12 @@ if(($action = post("action")) !== null) {
 			
 			foreach($templateScores as $templateID=>$score) {
 				$where = array("userID"=>$userID, "ladderID"=>$ladderID, "templateID"=>$templateID);
+				$warlightTemplateID = db()->stdGet("ladderTemplates", array("templateID"=>$templateID), "warlightTemplateID");
+				$canPlay = in_array($warlightTemplateID, $playableTemplates);
 				if(db()->stdExists("playerLadderTemplates", $where)) {
-					db()->stdSet("playerLadderTemplates", $where, array("score"=>$score));
+					db()->stdSet("playerLadderTemplates", $where, array("score"=>$score, "canPlay"=>$canPlay));
 				} else {
-					db()->stdNew("playerLadderTemplates", array_merge($where, array("score"=>$score)));
+					db()->stdNew("playerLadderTemplates", array_merge($where, array("score"=>$score, "canPlay"=>$canPlay)));
 				}
 			}
 			
@@ -107,7 +110,7 @@ $ladder_values = array();
 
 $templates = array(array("type"=>"html", "html"=>"Select your preferred templates. If possible, created games will use one of those templates."));
 foreach(db()->stdList("ladderTemplates", array("ladderID"=>$ladderID), array("templateID", "name", "warlightTemplateID")) as $template) {
-	$templates[] = array("type"=>"checkbox", "name"=>"template-" . $template["templateID"], "label"=>$template["name"] . " <a href=\"http://warlight.net/MultiPlayer?TemplateID={$template["warlightTemplateID"]}\" target=\"_new\"><em>View on warlight</em></a>");
+	$templates[] = array("type"=>"checkbox", "name"=>"template-" . $template["templateID"], "label"=>$template["name"] . " <a href=\"http://warlight.net/MultiPlayer?TemplateID={$template["warlightTemplateID"]}\" target=\"_new\"><em>View on warlight</em></a>" . (in_array($template["warlightTemplateID"], $playableTemplates) ? "" : " (Your WarLight level is not high enough to play this template.)"));
 	
 	$ladder_values["template-" . $template["templateID"]] = 1;
 }
