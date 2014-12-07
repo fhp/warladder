@@ -107,3 +107,10 @@ table .stretch {
 	margin-bottom: 5px;
 	margin-top: 5px;
 }
+
+.top-notification {
+	margin-top: -20px;
+	margin-bottom: 20px;
+	padding: 10px;
+	text-align: center;
+}

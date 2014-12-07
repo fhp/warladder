@@ -40,6 +40,14 @@ function page($pageHtml, $activeItem, $title = null, $subtitle = null, $headerMe
 		$pageTitle = $title;
 	}
 	
+	$emailHeader = "";
+	if (isLoggedIn()) {
+		$emailData = db()->stdGet("users", array("userID"=>currentUserID()), array("email", "emailConfirmation"));
+		if ($emailData["email"] !== null && $emailData["emailConfirmation"] !== null) {
+			$emailHeader = "<div class=\"top-notification alert alert-warning\"><p>We will not send you notification emails until you confirm your email address. Please confirm your address, or <a href=\"mysettings.php?resendemailnotification=1\">resend the confirmation email</a>.</p></div>\n";
+		}
+	}
+	
 	$jumbotron = "";
 	if ($title !== null) {
 		$jumbotron .= "<div class=\"jumbotron\">\n";
@@ -59,7 +67,7 @@ function page($pageHtml, $activeItem, $title = null, $subtitle = null, $headerMe
 		$jumbotron .= "</div>\n";
 	}
 	
-	return rawpage($jumbotron . '<div class="container">' . $pageHtml . '</div>', $activeItem, $pageTitle);
+	return rawpage($emailHeader . $jumbotron . '<div class="container">' . $pageHtml . '</div>', $activeItem, $pageTitle);
 }
 
 function menu($activeItem)

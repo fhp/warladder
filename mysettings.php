@@ -14,7 +14,15 @@ $ladder_error = "";
 if(($action = post("action")) !== null) {
 	if($action == "general-settings") {
 		if(post("email") !== null) {
-			db()->stdSet("users", array("userID"=>currentUserID()), array("email"=>post("email") == "" ? null : post("email")));
+			$newEmail = post("email");
+			$oldEmail = db()->stdGet("users", array("userID"=>currentUserID()), "email");
+			if ($oldEmail === null) {
+				$oldEmail = "";
+			}
+			if ($oldEmail !== $newEmail) {
+				initUserEmail(currentUserID(), post("email"));
+			}
+			// NOTE: als hier nog settings komen ongelijk de email, hier opslaan.
 			$general_messages .= "<div class=\"alert alert-success\" role=\"alert\"><strong>Success!</strong> Your preferences are saved.</div>";
 		}
 	}
@@ -67,6 +75,11 @@ if(($action = post("action")) !== null) {
 $html = "";
 
 $general_values = db()->stdGet("users", array("userID"=>currentUserID()), array("email"));
+
+if (get("resendemailnotification") !== null) {
+	sendConfirmationEmail(currentUserID());
+	$general_messages .= "<p class=\"alert alert-warning\">Confirmation email sent.</p>\n";
+}
 
 $html .= operationForm("mysettings.php", $general_error, "Email settings", "Save", array(
 	array("type"=>"hidden", "name"=>"action", "value"=>"general-settings"),
