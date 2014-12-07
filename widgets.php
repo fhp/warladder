@@ -4,9 +4,9 @@ function renderOpenLadders($title, $from, $count, $page = null)
 {
 	$query = "SELECT ladderID, name, summary, COUNT(userID) AS players "
 		. "FROM ladders "
-		. "INNER JOIN ladderPlayers USING (ladderID) "
+		. "LEFT JOIN ladderPlayers USING (ladderID) "
 		. "WHERE visibility = 'PUBLIC' AND ladders.active = '1' "
-		. "AND joinStatus = 'JOINED' AND ladderPlayers.active = '1' "
+		. "AND ((joinStatus IS NULL) OR (joinStatus = 'JOINED' AND ladderPlayers.active = '1')) "
 		. "GROUP BY ladderID, name, summary "
 		. "ORDER BY players DESC ";
 	

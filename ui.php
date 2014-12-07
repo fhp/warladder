@@ -63,7 +63,6 @@ function page($pageHtml, $activeItem, $title = null, $subtitle = null, $headerMe
 		if ($headerMessage !== null) {
 			$jumbotron .= "$headerMessage\n";
 		}
-		
 		$jumbotron .= "</div>\n";
 		$jumbotron .= "</div>\n";
 	}
@@ -120,6 +119,7 @@ function renderMenu($menuLeft, $menuRight, $activeItem)
 		</div>
 	</div>
 </nav>
+
 HTML;
 	return $menu;
 }
