@@ -10,7 +10,10 @@ if(($action = post("action")) !== null) {
 		if(post("email") !== null) {
 			$warlightUserID = $_SESSION["token"];
 			$user = apiGetUser($warlightUserID);
-			$_SESSION["userID"] = db()->stdNew("users", array("warlightUserID"=>$warlightUserID, "name"=>$user["name"], "color"=>$user["color"], "email"=>post("email") == "" ? null : post("email")));
+			$_SESSION["userID"] = db()->stdNew("users", array("warlightUserID"=>$warlightUserID, "name"=>$user["name"], "color"=>$user["color"]));
+			if (post("email") !== null) {
+				initUserEmail($_SESSION["userID"], post("email"));
+			}
 			
 			redirect("index.php");
 		}

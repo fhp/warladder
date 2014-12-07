@@ -9,9 +9,16 @@ require_once("ui.php");
 require_once("warlightapi.php");
 require_once("widgets.php");
 require_once("/usr/lib/phpdatabase/database.php");
+require_once("/usr/lib/phpmail/mimemail.php");
 
 $database = new MysqlConnection();
 $database->open($config["dbHost"], $config["dbUser"], $config["dbPass"], $config["dbName"]);
+
+if (isset($_SESSION["userID"])) {
+	if (!db()->stdExists("users", array("userID"=>$_SESSION["userID"]))) {
+		unset($_SESSION["userID"]);
+	}
+}
 
 function db()
 {
@@ -163,3 +170,67 @@ function removePlayerRank($ladderID, $userID)
 	db()->commitTransaction();
 }
 
+function sendConfirmationEmail($userID)
+{
+	$userData = db()->stdGet("users", array("userID"=>$userID), array("name", "email", "emailConfirmation"));
+	$name = $userData["name"];
+	$email = $userData["email"];
+	$confirmation = $userData["emailConfirmation"];
+	if ($email === null || $confirmation === null) {
+		return;
+	}
+	
+	$nameHtml = htmlentities($name);
+	$emailHtml = htmlentities($email);
+	$link = "{$GLOBALS["config"]["baseUrl"]}confirmemail.php?player=$userID&confirmation=$confirmation";
+	$linkHtml = htmlentities($link);
+	
+	$mail = new mimemail();
+	$mail->addReceiver($email, $name);
+	$mail->setSender($GLOBALS["config"]["email"], "warladder.net");
+	$mail->setSubject("Confirm your address for warladder.net");
+	$mail->setHtmlMessage(<<<MESSAGE
+<p>Hi $nameHtml,</p>
+
+<p>Somebody (and we hope it was you) configured your email address &lt;$emailHtml&gt; for the warladder.net registration of $nameHtml. Please click <a href="$linkHtml">this link</a> to confirm that you want this.</p>
+
+<p>If you do not want to do this, simply ignore this message.</p>
+
+MESSAGE
+,
+<<<MESSAGE
+Hi $name,
+
+Somebody (and we hope it was you) configured your email address <$email> for the warladder.net registration of $name. Please visit $link to confirm that you want this.
+
+If you do not want to do this, simply ignore this message.
+
+MESSAGE
+	);
+	$mail->send();
+}
+
+function initUserEmail($userID, $email)
+{
+	if ($email === "") {
+		$email = null;
+	}
+	if ($email === null) {
+		$confirmation = null;
+	} else {
+		$characters = "0123456789qwertyuioplkjhgfdsazxcvbnm";
+		while (true) {
+			$confirmation = "";
+			for ($i = 0; $i < 50; $i++) {
+				$confirmation .= $characters[rand(0, strlen($characters) - 1)];
+			}
+			if (!db()->stdExists("users", array("userID"=>$userID, "emailConfirmation"=>$confirmation))) {
+				break;
+			}
+		}
+	}
+	db()->stdSet("users", array("userID"=>$userID), array("email"=>$email, "emailConfirmation"=>$confirmation));
+	if ($confirmation !== null) {
+		sendConfirmationEmail($userID);
+	}
+}

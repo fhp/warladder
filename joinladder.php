@@ -56,7 +56,10 @@ if(($action = post("action")) !== null) {
 			if (!isLoggedIn()) {
 				$warlightUserID = $_SESSION["token"];
 				$user = apiGetUser($warlightUserID);
-				$_SESSION["userID"] = db()->stdNew("users", array("warlightUserID"=>$warlightUserID, "name"=>$user["name"], "color"=>$user["color"], "email"=>post("email") == "" ? null : post("email")));
+				$_SESSION["userID"] = db()->stdNew("users", array("warlightUserID"=>$warlightUserID, "name"=>$user["name"], "color"=>$user["color"]));
+				if (post("email") !== null) {
+					initUserEmail($_SESSION["userID"], post("email"));
+				}
 			}
 			$userID = currentUserID();
 			$score = tsDefaultScore();
@@ -134,4 +137,3 @@ $html .= operationForm("joinladder.php?ladder=$ladderID", $ladder_error, "Ladder
 ), $ladder_values);
 
 page($html, "joinladder", "Join the ladder", "<a href=\"ladder.php?ladder=$ladderID\">$ladderNameHtml</a>", null, "Preferences");
-
