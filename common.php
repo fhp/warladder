@@ -16,7 +16,7 @@ $database->open($config["dbHost"], $config["dbUser"], $config["dbPass"], $config
 
 if (isset($_SESSION["userID"])) {
 	if (!db()->stdExists("users", array("userID"=>$_SESSION["userID"]))) {
-		unset($_SESSION["userID"]);
+		session_destroy();
 	}
 }
 

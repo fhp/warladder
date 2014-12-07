@@ -37,8 +37,8 @@ if(($action = post("action")) !== null) {
 		if(!ctype_digit($values["simultaneousGames"])) {
 			$ladder_error .= formError("Please enter a number for the simultaneous games.");
 		}
-		$values["simultaneousGames"] = min($values["simultaneousGames"], $ladderInfo["maxSimultaneousGames"]);
-		$values["simultaneousGames"] = max($values["simultaneousGames"], $ladderInfo["minSimultaneousGames"]);
+		$values["simultaneousGames"] = $ladderInfo["maxSimultaneousGames"] === null ? $values["simultaneousGames"] : min($values["simultaneousGames"], $ladderInfo["maxSimultaneousGames"]);
+		$values["simultaneousGames"] = $ladderInfo["minSimultaneousGames"] === null ? $values["simultaneousGames"] : max($values["simultaneousGames"], $ladderInfo["minSimultaneousGames"]);
 		$values["emailInterval"] = post("emailInterval");
 		if(!in_array($values["emailInterval"], array("NEVER", "DAILY", "WEEKLY", "MONTHLY"))) {
 			$ladder_error .= formError("Invalid email interval.");
@@ -108,14 +108,24 @@ if ($ladderID !== null) {
 		$ladder_values["template-" . $template["templateID"]] = db()->stdGetTry("playerLadderTemplates", array("userID"=>currentUserID(), "ladderID"=>$ladderID, "templateID"=>$template["templateID"]), "score") == 1 ? 1 : null;
 	}
 	
+	if($ladderInfo["minSimultaneousGames"] !== null && $ladderInfo["maxSimultaneousGames"] !== null) {
+		$htmlText = "<em>Choose between {$ladderInfo["minSimultaneousGames"]} and {$ladderInfo["maxSimultaneousGames"]}.</em>";
+	} else if($ladderInfo["minSimultaneousGames"] !== null && $ladderInfo["maxSimultaneousGames"] === null) {
+		$htmlText = "<em>Choose more than {$ladderInfo["minSimultaneousGames"]}.</em>";
+	} else if($ladderInfo["minSimultaneousGames"] === null && $ladderInfo["maxSimultaneousGames"] !== null) {
+		$htmlText = "<em>Choose up to {$ladderInfo["maxSimultaneousGames"]}.</em>";
+	} else {
+		$htmlText = "<em>Choose any numer you like.</em>";
+	}
+	
 	$html .= operationForm("mysettings.php?ladder=$ladderID", $ladder_error, "Ladder Settings - $ladderNameHtml", "Save", array(
 		array("type"=>"hidden", "name"=>"action", "value"=>"ladder-settings"),
-		($ladderInfo["minSimultaneousGames"] == $ladderInfo["maxSimultaneousGames"] ?
+		($ladderInfo["minSimultaneousGames"] !== null && $ladderInfo["minSimultaneousGames"] == $ladderInfo["maxSimultaneousGames"] ?
 			array("type"=>"hidden", "name"=>"simultaneousGames", "value"=>$ladderInfo["minSimultaneousGames"])
 		:
 			array("title"=>"Simultaneous games", "type"=>"colspan", "columns"=>array(
 				array("type"=>"text", "name"=>"simultaneousGames", "cellclass"=>"stretch"),
-				array("type"=>"html", "html"=>"<em>Choose between {$ladderInfo["minSimultaneousGames"]} and {$ladderInfo["maxSimultaneousGames"]}.</em>", "cellclass"=>"nowrap"),
+				array("type"=>"html", "html"=>$htmlText, "cellclass"=>"nowrap"),
 			))
 		),
 		array("title"=>"Receive ladder standings email", "type"=>"dropdown", "name"=>"emailInterval", "options"=>array(

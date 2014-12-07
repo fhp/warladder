@@ -2,6 +2,6 @@
 
 require_once("common.php");
 
-unset($_SESSION["userID"]);
+session_destroy();
 
 redirect("index.php");
