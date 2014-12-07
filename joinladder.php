@@ -30,7 +30,7 @@ if(($action = post("action")) !== null) {
 		$ladderID = get("ladder");
 		checkLadder($ladderID);
 		
-		$ladderInfo = db()->stdGet("ladders", array("ladderID"=>$ladderID), array("minSimultaneousGames", "maxSimultaneousGames", "accessibility"));
+		$ladderInfo = db()->stdGet("ladders", array("ladderID"=>$ladderID), array("name", "minSimultaneousGames", "maxSimultaneousGames", "accessibility"));
 		
 		$values = array();
 		$values["simultaneousGames"] = post("simultaneousGames");
@@ -89,6 +89,33 @@ if(($action = post("action")) !== null) {
 					db()->stdSet("playerLadderTemplates", $where, array("score"=>$score));
 				} else {
 					db()->stdNew("playerLadderTemplates", array_merge($where, array("score"=>$score)));
+				}
+			}
+			
+			if($ladderInfo["accessibility"] != "PUBLIC") {
+				$ladderIDSql = db()->addSlashes($ladderID);
+				$mods = db()->query("SELECT email, emailConfirmation FROM ladderAdmins INNER JOIN users USING(userID) WHERE ladderID='$ladderIDSql'")->fetchList();
+				
+				$userName = db()->stdGet("users", array("userID"=>currentUserID()), "name");
+				$userNameHtml = htmlentities($userName);
+				$ladderNameHtml = htmlentities($ladderInfo["name"]);
+				$modladderHtml = htmlentities($GLOBALS["config"]["baseUrl"] . "modladder.php?ladder=$ladderID");
+				
+				foreach($mods as $mod) {
+					if ($mod["email"] !== null && $mod["emailConfirmation"] === null) {
+						$mail = new mimemail();
+						$mail->addReceiver($mod["email"]);
+						$mail->setSender($GLOBALS["config"]["email"], "warladder.net");
+						$mail->setSubject("New player for your ladder {$ladderInfo["name"]}");
+						$mail->setHtmlMessage(<<<MESSAGE
+<p>Dear $ladderNameHtml moderator,</p>
+
+<p>A new player, $userNameHtml, signed up for your ladder $ladderNameHtml. Please visit <a href="$modladderHtml">the moderator page</a> to accept or reject this player.</p>
+
+MESSAGE
+						);
+						$mail->send();
+					}
 				}
 			}
 			
