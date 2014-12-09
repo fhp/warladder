@@ -122,7 +122,7 @@ Contender 2: $userName2 (Ranked $rank2 with a rating of {$user2["rating"]})
 Settings: $templateName
 DESC;
 	
-	$warlightGameID = apiCreateGame($templates[$templateID], $name, $description, array($user1WarlightID=>1, $user2WarlightID=>2));
+	$warlightGameID = apiCreateGame($templates[$templateID], $name, $description, array($user1WarlightID=>0, $user2WarlightID=>1));
 	if ($warlightGameID === null) {
 		db()->rollbackTransaction();
 		return false;
