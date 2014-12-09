@@ -7,71 +7,13 @@ define('ALWAYS_ACCEPTABLE_MATCH_QUALITY', 0.9);
 define('ACCEPTABLE_MATCH_QUALITY_SLACK_PER_MISSING_GAME', 0.1);
 
 
-function demoApiGetGame($warlightGameID)
-{
-	$gameID = db()->stdGet("ladderGames", array("warlightGameID"=>$warlightGameID), "gameID");
-	$players = db()->stdList("gamePlayers", array("gameID"=>$gameID), "userID");
-	if (count($players) != 2) {
-		die("VERKEERDE HOEVEELHEID SPELERS IN GAME\n");
-	}
-	$userID1 = db()->stdGet("users", array("userID"=>$players[0]), "warlightUserID");
-	$userID2 = db()->stdGet("users", array("userID"=>$players[1]), "warlightUserID");
-	
-	if ($userID1 > $userID2) {
-		$higher = $userID1;
-		$lower = $userID2;
-	} else {
-		$higher = $userID2;
-		$lower = $userID1;
-	}
-	$distance = $higher - $lower;
-	if (rand(0, 1000000) < 1000000 * pow(0.25, $distance / 10)) {
-		$winner = $lower;
-	} else {
-		$winner = $higher;
-	}
-	
-	return array("finished"=>true, "winners"=>array($winner));
-}
-
-function demoApiGetGameEndTime($warlightGameID)
-{
-	return time();
-}
-
-function demoApiCreateGame($templateID, $gameName, $personalMessage, $players)
-{
-	$record = db()->query("SELECT MAX(warlightGameID) AS maxWarlightGameID FROM ladderGames")->fetchArray();
-	$warlightGameID = $record["maxWarlightGameID"] + 1;
-	
-	$playerString = "";
-	foreach($players as $player => $team) {
-		if ($playerString != "") {
-			$playerString .= " and ";
-		}
-		$playerString .= $player;
-	}
-	
-	echo "Creating game #$warlightGameID between players $playerString.\n";
-	return $warlightGameID;
-}
-
-function demoApiGetUserTemplates($warlightUserID, $warlightTemplateIDs)
-{
-	return $warlightTemplateIDs;
-}
-
-
-
-
-
 function finishGames($ladderID)
 {
 	$results = array();
 	
 	$runningGames = db()->stdList("ladderGames", array("ladderID"=>$ladderID, "status"=>"RUNNING"), array("gameID", "warlightGameID"));
 	foreach ($runningGames as $game) {
-		$status = demoApiGetGame($game["warlightGameID"]);
+		$status = apiGetGame($game["warlightGameID"]);
 		if (!$status["finished"]) {
 			continue;
 		}
@@ -84,7 +26,7 @@ function finishGames($ladderID)
 			$winner = db()->stdGet("users", array("warlightUserID"=>$status["winners"][0]), "userID");
 		}
 		
-		$endTime = demoApiGetGameEndTime($game["warlightGameID"]);
+		$endTime = apiGetGameEndTime($game["warlightGameID"]);
 		
 		db()->stdSet("ladderGames", array("gameID"=>$game["gameID"]), array("status"=>"FINISHED", "winningUserID"=>$winner, "endTime"=>$endTime));
 		
@@ -180,7 +122,7 @@ Contender 2: $userName2 (Ranked $rank2 with a rating of {$user2["rating"]})
 Settings: $templateName
 DESC;
 	
-	$warlightGameID = demoApiCreateGame($templates[$templateID], $name, $description, array($user1WarlightID=>1, $user2WarlightID=>2));
+	$warlightGameID = apiCreateGame($templates[$templateID], $name, $description, array($user1WarlightID=>1, $user2WarlightID=>2));
 	if ($warlightGameID === null) {
 		db()->rollbackTransaction();
 		return false;
