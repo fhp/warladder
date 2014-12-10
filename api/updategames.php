@@ -94,7 +94,18 @@ function createGame($ladderID, $userID1, $userID2)
 	
 	arsort($scores);
 	reset($scores);
-	list($templateID, $score) = each($scores);
+	list($templateID, $maxScore) = each($scores);
+	
+	$bestScores = array();
+	foreach($scores as $templateID => $score) {
+		if ($score == $maxScore) {
+			$bestScores[] = $templateID;
+		} else {
+			break;
+		}
+	}
+	$templateID = $bestScores[rand(0, count($bestScores) - 1)];
+	
 	$templateName = db()->stdGet("ladderTemplates", array("templateID"=>$templateID), "name");
 	
 	
