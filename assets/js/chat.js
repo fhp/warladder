@@ -22,7 +22,7 @@ function LadderChat(ladderID)
 		
 		html = "";
 		$.each(lines, function(i, line) {
-			html += "<tr class=\"chatLine\"><td class=\"chatName\"><a href=\"player.php?ladder=" + ladderID + "&player=" + line["userID"] + "\">" + line["name"] + "</a></td><td class=\"stretch\">" + line["message"] + "</td></tr>";
+			html += "<tr class=\"chatLine\"><td class=\"chatDate\">" + formatDate(line["timestamp"]) + "</td><td class=\"chatName\"><a href=\"player.php?ladder=" + ladderID + "&player=" + line["userID"] + "\">" + line["name"] + "</a></td><td class=\"stretch chatMessage\">" + line["message"] + "</td></tr>";
 			lastUpdate = line["timestamp"];
 		});
 		$("#chatLines").append(html);
@@ -53,6 +53,25 @@ function LadderChat(ladderID)
 		
 		setInterval(updateChat, 30000);
 		updateChat();
+	}
+	
+	formatDate = function(timestamp) {
+		formatNumber = function(x) {
+			str = x.toString();
+			if(str.length == 1) {
+				return "0" + str;
+			} else {
+				return str;
+			}
+		}
+		d = new Date(timestamp*1000);
+		months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+		year = d.getFullYear();
+		month = months[d.getMonth()];
+		date = formatNumber(d.getDate());
+		hour = formatNumber(d.getHours());
+		min = formatNumber(d.getMinutes());
+		return date + ' ' + month + ' ' + year + ' ' + hour + ':' + min;
 	}
 	
 	$(init());
