@@ -64,9 +64,19 @@ $html .= <<<HTML
 	<table class="table table-condensed" id="chatLines"></table>
 	<div class="panel-footer enterChat">
 		<form id="chatForm"><table><tr>
+HTML;
+if(isLoggedIn()) {
+	$html .= <<<HTML
 			<td class="stretch newChatLinetd"><input type="text" name="newChatLine" id="newChatLine" class="form-control"></td>
 			<td><input type="submit" name="newChatLineSubmit" id="newChatLineSubmit" class="btn btn-default" value="Send"></td>
 			<td><input type="button" name="chatShowAll" id="chatShowAll" class="btn" value="Show all"></td>
+HTML;
+} else {
+	$html .= <<<HTML
+			<td><div class="show-all"><input type="button" name="chatShowAll" id="chatShowAll" class="btn" value="Show all"></div></td>
+HTML;
+}
+$html .= <<<HTML
 		</tr></table></form>
 	</div>
 </div>
