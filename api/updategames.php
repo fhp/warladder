@@ -27,6 +27,10 @@ function finishGames($ladderID)
 		}
 		
 		$endTime = apiGetGameEndTime($game["warlightGameID"]);
+		if ($endTime === null) {
+			// This can happen for turn-0 boots
+			$endTime = time();
+		}
 		
 		db()->stdSet("ladderGames", array("gameID"=>$game["gameID"]), array("status"=>"FINISHED", "winningUserID"=>$winner, "endTime"=>$endTime));
 		
