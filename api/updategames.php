@@ -2,9 +2,7 @@
 
 require_once(dirname(__FILE__) . "/../common.php");
 
-// TODO: per speler berekenen op basis van maximum haalbare score
-define('ALWAYS_ACCEPTABLE_MATCH_QUALITY', 0.9);
-define('ACCEPTABLE_MATCH_QUALITY_SLACK_PER_MISSING_GAME', 0.1);
+define('HAPPINESS_BITS_PER_DAY', 2.0);
 
 
 function finishGames($ladderID)
@@ -162,20 +160,6 @@ function createGames($ladderID)
 	$ladderIDSql = db()->addSlashes($ladderID);
 	
 	/*
-	 * Compute the average game length.
-	 */
-	$averageGameLengthRecord = db()->query("SELECT AVG(endTime - startTime) AS averageGameLength FROM ladderGames WHERE ladderID = '$ladderIDSql' AND status = 'FINISHED'")->fetchArray();
-	if ($averageGameLengthRecord["averageGameLength"] === null) {
-		/*
-		 * This is only possible if no games have been completed at this ladder yet, which means the ladder has only just begun.
-		 * In that case, we may as well accept any possible game, because all scores are equal anyway.
-		 */
-		$averageGameLength = 1;
-	} else {
-		$averageGameLength = $averageGameLengthRecord["averageGameLength"];
-	}
-	
-	/*
 	 * Initialize the player database.
 	 */
 	$players = db()->stdMap("ladderPlayers", array("ladderID"=>$ladderID, "joinStatus"=>"JOINED", "active"=>1), "userID", array("simultaneousGames", "joinTime", "mu", "sigma"));
@@ -288,16 +272,26 @@ function createGames($ladderID)
 	 */
 	$interveningGamesMatrix = array();
 	/*
-	 * As a default case, two players who have never played a game together have an infinite number of games played since that point,
-	 * denoted as true.
+	 * If two players have never played a game together, count the total number of games played by player 1.
 	 */
+	$playedGames = db()->query("
+		SELECT
+		userID,
+		COUNT(ladderGames.gameID) AS gamesPlayed
+		
+		FROM ladderGames
+		INNER JOIN gamePlayers USING (gameID)
+		
+		WHERE ladderID = '$ladderIDSql'
+		GROUP BY userID
+	")->fetchMap("userID", "gamesPlayed");
 	foreach ($players as $userID1 => $player) {
 		$interveningGamesMatrix[$userID1] = array();
 		foreach ($players as $userID2 => $player) {
 			if ($userID1 == $userID2) {
 				continue;
 			}
-			$interveningGamesMatrix[$userID1][$userID2] = true;
+			$interveningGamesMatrix[$userID1][$userID2] = $playedGames[$userID1];
 		}
 	}
 	/*
@@ -351,7 +345,7 @@ function createGames($ladderID)
 		LEFT JOIN gamePlayers ON lastGames.userID1 = gamePlayers.userID
 		LEFT JOIN ladderGames USING (gameID)
 		
-		WHERE ladderGames.startTime >= lastGames.lastGameTime
+		WHERE (ladderGames.endTime IS NULL OR ladderGames.endTime >= lastGames.lastGameTime)
 		
 		GROUP BY userID1, userID2
 	")->fetchList();
@@ -390,9 +384,9 @@ function createGames($ladderID)
 	 * This function computes how much player 1 would like to play with player 2.
 	 * If this returns >0, then he does want to play, otherwise he does not.
 	 */
-	$preference = function($userID1, $userID2) use (&$players, &$qualityMatrix, &$interveningGamesMatrix, $averageGameLength) {
+	$preference = function($userID1, $userID2) use (&$players, &$qualityMatrix, &$interveningGamesMatrix) {
 		$interveningGames = $interveningGamesMatrix[$userID1][$userID2];
-		$poolSizeSqrt = sqrt($players[$userID1]["poolSize"]);
+		$poolSize = $players[$userID1]["poolSize"];
 		$quality = $qualityMatrix[$userID1][$userID2];
 		
 		if ($interveningGames === false) {
@@ -400,19 +394,17 @@ function createGames($ladderID)
 		}
 		
 		// The memory score is a score multiplier that drops if the players have recently played a game together.
-		if ($interveningGames === true) {
-			$memoryScore = 1.0;
-		} else if ($poolSizeSqrt < 0.001) {
-			$memoryScore = 1.0;
-		} else if ($interveningGames > $poolSizeSqrt) {
+		if ($poolSize < 0.001) {
 			$memoryScore = 1.0;
 		} else {
-			$memoryScore = ((float)$interveningGames) / $poolSizeSqrt;
+			$memoryScore = ((float)$interveningGames) / $poolSize;
 		}
 		
-		$relativeMissedGames = $players[$userID1]["relativeMissedGameSeconds"] / $averageGameLength;
+		$happiness = log($quality, 2) + $memoryScore;
 		
-		return ($quality * $memoryScore) - (ALWAYS_ACCEPTABLE_MATCH_QUALITY - (ACCEPTABLE_MATCH_QUALITY_SLACK_PER_MISSING_GAME * $relativeMissedGames));
+		$tolerance = $players[$userID1]["relativeMissedGameSeconds"] / 86400.0 * HAPPINESS_BITS_PER_DAY;
+		
+		return $happiness + $tolerance;
 	};
 	
 	/*
