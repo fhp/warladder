@@ -75,6 +75,7 @@ function menu($activeItem)
 	$menuLeft = array(
 		array("name"=>"home", "label"=>"Home", "url"=>"index.php"),
 		array("name"=>"ladders", "label"=>"Ladders", "url"=>"ladders.php"),
+		array("name"=>"about", "label"=>"About", "url"=>"about.php"),
 	);
 	if(isLoggedIn()) {
 		$menuRight = array(
