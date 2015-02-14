@@ -111,8 +111,8 @@ function createGame($ladderID, $userID1, $userID2)
 	$templateName = db()->stdGet("ladderTemplates", array("templateID"=>$templateID), "name");
 	
 	
-	
-	db()->startTransaction();
+	$savepoint = "game{$userID1}vs{$userID2}";
+	db()->query("SAVEPOINT $savepoint");
 	$gameID = db()->stdNew("ladderGames", array("ladderID"=>$ladderID, "templateID"=>$templateID, "warlightGameID"=>null, "name"=>null, "status"=>"RUNNING", "winningUserID"=>null, "startTime"=>time(), "endTime"=>null));
 	db()->stdNew("gamePlayers", array("gameID"=>$gameID, "userID"=>$userID1));
 	db()->stdNew("gamePlayers", array("gameID"=>$gameID, "userID"=>$userID2));
@@ -137,7 +137,7 @@ DESC;
 	
 	$warlightGameID = apiCreateGame($templates[$templateID], $name, $description, array($user1WarlightID=>null, $user2WarlightID=>null));
 	if ($warlightGameID === null) {
-		db()->rollbackTransaction();
+		db()->query("ROLLBACK TO $savepoint");
 		return false;
 	}
 	
@@ -149,7 +149,6 @@ DESC;
 			"<a href=\"player.php?ladder=$ladderID&player=$userID2\">$userName2Html</a>";
 	
 	db()->stdSet("ladderGames", array("gameID"=>$gameID), array("warlightGameID"=>$warlightGameID, "name"=>$name, "htmlName"=>$htmlName));
-	db()->commitTransaction();
 	
 	return true;
 }
