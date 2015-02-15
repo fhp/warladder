@@ -17,6 +17,7 @@ function finishGames($ladderID)
 		}
 		
 		$doDelete = false;
+		$endTime = null;
 		if ($status["state"] == "rejected") {
 			$winner = null;
 			$doDelete = true;
@@ -28,9 +29,9 @@ function finishGames($ladderID)
 			} else {
 				$winner = null;
 			}
+			$endTime = apiGetGameEndTime($game["warlightGameID"]);
 		}
 		
-		$endTime = apiGetGameEndTime($game["warlightGameID"]);
 		if ($endTime === null) {
 			// This can happen for turn-0 boots
 			$endTime = time();
@@ -358,7 +359,7 @@ function createGames($ladderID)
 		LEFT JOIN gamePlayers ON lastGames.userID1 = gamePlayers.userID
 		LEFT JOIN ladderGames USING (gameID)
 		
-		WHERE ladderGames.endTime >= lastGames.lastGameTime
+		WHERE ladderGames.endTime > lastGames.lastGameTime
 		
 		GROUP BY userID1, userID2
 	")->fetchList();
@@ -413,7 +414,7 @@ function createGames($ladderID)
 			$memoryScore = ((float)$interveningGames) / $poolSize;
 		}
 		
-		$happiness = log($quality, 2) + $memoryScore;
+		$happiness = log($quality, 2) + $memoryScore * 1.5 - 0.5;
 		
 		$tolerance = $players[$userID1]["relativeMissedGameSeconds"] / 86400.0 * HAPPINESS_BITS_PER_DAY;
 		

@@ -246,7 +246,6 @@ function apiDeleteGame($gameID)
 	$json["gameID"] = (int)$gameID;
 	
 	$responseJson = apiPost("http://warlight.net/API/DeleteLobbyGame", array(), json_encode($json), false);
-	var_dump($responseJson);
 	$response = json_decode($responseJson);
 	if ($response === null) {
 		return false;
