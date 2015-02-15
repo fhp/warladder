@@ -58,7 +58,9 @@ function finishGames($ladderID)
 			}
 		}
 		
-		$results[] = array("teams"=>$teams, "rankings"=>$rankings);
+		if ($winner !== null) {
+			$results[] = array("teams"=>$teams, "rankings"=>$rankings);
+		}
 	}
 	
 	$players = db()->stdList("ladderPlayers", array("ladderID"=>$ladderID, "joinStatus"=>"JOINED", "active"=>1), array("userID", "mu", "sigma"));
