@@ -136,25 +136,41 @@ function apiGetGame($gameID)
 	if (!isset($response->state)) {
 		return null;
 	}
-	if ($response->state != "Finished") {
-		return array("finished" => false, "winners" => array());
-	}
 	if (!isset($response->players)) {
 		return null;
 	}
-	$winners = array();
-	foreach($response->players as $player) {
-		if (!isset($player->id)) {
-			return null;
+	if ($response->state == "DistributingTerritories" || $response->state == "Playing") {
+		return array("state"=>"playing");
+	} else if ($response->state == "Finished") {
+		$winners = array();
+		foreach($response->players as $player) {
+			if (!isset($player->id)) {
+				return null;
+			}
+			if (!isset($player->state)) {
+				return null;
+			}
+			if ($player->state == "VotedToEnd") {
+				return array("state"=>"votedtoend");
+			}
+			if ($player->state == "Won") {
+				$winners[] = $player->id;
+			}
 		}
-		if (!isset($player->state)) {
-			return null;
+		return array("state"=>"finished", "winners"=>$winners);
+	} else if ($response->state == "WaitingForPlayers") {
+		foreach ($response->players as $player) {
+			if (!isset($player->state)) {
+				return null;
+			}
+			if ($player->state == "Declined") {
+				return array("state"=>"rejected");
+			}
 		}
-		if ($player->state == "Won") {
-			$winners[] = $player->id;
-		}
+		return array("state"=>"playing");
+	} else {
+		return null;
 	}
-	return array("finished" => true, "winners" => $winners);
 }
 
 function apiGetGameEndTime($gameID)
@@ -220,6 +236,25 @@ function apiCreateGame($templateID, $gameName, $personalMessage, $players)
 		return null;
 	}
 	return $response->gameID;
+}
+
+function apiDeleteGame($gameID)
+{
+	$json = array();
+	$json["Email"] = $GLOBALS["config"]["email"];
+	$json["APIToken"] = $GLOBALS["config"]["apiKey"];
+	$json["gameID"] = (int)$gameID;
+	
+	$responseJson = apiPost("http://warlight.net/API/DeleteLobbyGame", array(), json_encode($json), false);
+	var_dump($responseJson);
+	$response = json_decode($responseJson);
+	if ($response === null) {
+		return false;
+	}
+	if (isset($response->error)) {
+		return false;
+	}
+	return true;
 }
 
 

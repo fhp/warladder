@@ -12,16 +12,22 @@ function finishGames($ladderID)
 	$runningGames = db()->stdList("ladderGames", array("ladderID"=>$ladderID, "status"=>"RUNNING"), array("gameID", "warlightGameID"));
 	foreach ($runningGames as $game) {
 		$status = apiGetGame($game["warlightGameID"]);
-		if (!$status["finished"]) {
+		if ($status["state"] == "playing") {
 			continue;
 		}
 		
-		$players = db()->stdList("gamePlayers", array("gameID"=>$game["gameID"]), "userID");
-		
-		if (count($status["winners"]) == 0) {
+		$doDelete = false;
+		if ($status["state"] == "rejected") {
+			$winner = null;
+			$doDelete = true;
+		} else if ($status["state"] == "votedtoend") {
 			$winner = null;
 		} else {
-			$winner = db()->stdGet("users", array("warlightUserID"=>$status["winners"][0]), "userID");
+			if (isset($status["winners"]) && count($status["winners"]) > 0) {
+				$winner = db()->stdGetTry("users", array("warlightUserID"=>$status["winners"][0]), "userID", null);
+			} else {
+				$winner = null;
+			}
 		}
 		
 		$endTime = apiGetGameEndTime($game["warlightGameID"]);
@@ -30,8 +36,16 @@ function finishGames($ladderID)
 			$endTime = time();
 		}
 		
+		if ($doDelete) {
+			$success = apiDeleteGame($game["warlightGameID"]);
+			if (!$success) {
+				continue;
+			}
+		}
+		
 		db()->stdSet("ladderGames", array("gameID"=>$game["gameID"]), array("status"=>"FINISHED", "winningUserID"=>$winner, "endTime"=>$endTime));
 		
+		$players = db()->stdList("gamePlayers", array("gameID"=>$game["gameID"]), "userID");
 		$teams = array();
 		$rankings = array();
 		foreach ($players as $userID) {
