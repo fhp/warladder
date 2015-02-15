@@ -358,7 +358,7 @@ function createGames($ladderID)
 		LEFT JOIN gamePlayers ON lastGames.userID1 = gamePlayers.userID
 		LEFT JOIN ladderGames USING (gameID)
 		
-		WHERE (ladderGames.endTime IS NULL OR ladderGames.endTime >= lastGames.lastGameTime)
+		WHERE ladderGames.endTime >= lastGames.lastGameTime
 		
 		GROUP BY userID1, userID2
 	")->fetchList();
