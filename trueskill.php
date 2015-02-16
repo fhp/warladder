@@ -1,5 +1,7 @@
 <?php
 
+define('RATING_OFFSET', 200.0);
+
 function pipeExec($command, $stdin)
 {
 	$fdSpec = array(
@@ -34,7 +36,7 @@ function pipeExec($command, $stdin)
 
 function tsDefaultScore()
 {
-	return array("mu"=>1000.0, "sigma"=>(1000.0/3.0), "rating"=>0.0);
+	return array("mu"=>1000.0, "sigma"=>(1000.0/3.0), "rating"=>0.0 + RATING_OFFSET);
 }
 
 function tsMatchMatrix($players)
@@ -92,7 +94,7 @@ function tsProcessMatchResults($players, $results)
 		$newScores[$score->id] = array();
 		$newScores[$score->id]["mu"] = $score->mu;
 		$newScores[$score->id]["sigma"] = $score->sigma;
-		$newScores[$score->id]["rating"] = $score->rating;
+		$newScores[$score->id]["rating"] = $score->rating + RATING_OFFSET;
 		$newScores[$score->id]["rank"] = $rank++;
 	}
 	return $newScores;
