@@ -17,9 +17,10 @@ foreach($users as $user) {
 	
 	$playerTemplates = db()->stdMap("playerLadderTemplates", array("userID"=>$user["userID"]), "templateID", array("ladderID", "templateID", "canPlay"));
 	
+	$playerLadders = db()->stdList("ladderPlayers", array("userID"=>$user["userID"]), array("ladderID", "newTemplateScore"));
 	$allTemplates = array();
-	foreach($ladders as $ladderID) {
-		$allTemplates = array_merge($allTemplates, $ladderTemplates[$ladderID]);
+	foreach($playerLadders as $ladder) {
+		$allTemplates = array_merge($allTemplates, $ladderTemplates[$ladder["ladderID"]]);
 	}
 	
 	$usableTemplates = apiGetUserTemplates($user["warlightUserID"], array_unique($allTemplates));
@@ -27,26 +28,25 @@ foreach($users as $user) {
 		continue;
 	}
 	
-	$ladders = db()->stdList("ladderPlayers", array("userID"=>$user["userID"]), "ladderID");
-	foreach($ladders as $ladderID) {
-		foreach($ladderTemplates[$ladderID] as $templateID=>$warlightTemplateID) {
+	foreach($playerLadders as $ladder) {
+		foreach($ladderTemplates[$ladder["ladderID"]] as $templateID=>$warlightTemplateID) {
 			if(!isset($playerTemplates[$templateID])) {
-				db()->stdNew("playerLadderTemplates", array("userID"=>$user["userID"], "ladderID"=>$ladderID, "templateID"=>$templateID, "score"=>1, "canPlay"=>in_array($warlightTemplateID, $usableTemplates)));
+				db()->stdNew("playerLadderTemplates", array("userID"=>$user["userID"], "ladderID"=>$ladder["ladderID"], "templateID"=>$templateID, "score"=>$ladder["newTemplateScore"], "canPlay"=>in_array($warlightTemplateID, $usableTemplates)));
 			} else if($playerTemplates[$templateID]["canPlay"] != in_array($warlightTemplateID, $usableTemplates)) {
-				db()->stdSet("playerLadderTemplates", array("userID"=>$user["userID"], "ladderID"=>$ladderID, "templateID"=>$templateID), array("canPlay"=>in_array($warlightTemplateID, $usableTemplates)));
+				db()->stdSet("playerLadderTemplates", array("userID"=>$user["userID"], "ladderID"=>$ladder["ladderID"], "templateID"=>$templateID), array("canPlay"=>in_array($warlightTemplateID, $usableTemplates)));
 			}
 		}
 	}
 	foreach($playerTemplates as $templateID=>$template) {
 		$stillInUse = false;
-		foreach($ladders as $ladderID) {
-			if(isset($ladderTemplates[$ladderID][$templateID])) {
+		foreach($playerLadders as $ladder) {
+			if(isset($ladderTemplates[$ladder["ladderID"]][$templateID])) {
 				$stillInUse = true;
 				break;
 			}
 		}
 		if(!$stillInUse) {
-			db()->stdDel("playerLadderTemplates", array("userID"=>$user["userID"], "ladderID"=>$ladderID, "templateID"=>$templateID));
+			db()->stdDel("playerLadderTemplates", array("userID"=>$user["userID"], "ladderID"=>$ladder["ladderID"], "templateID"=>$templateID));
 		}
 	}
 }

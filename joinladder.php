@@ -46,6 +46,10 @@ if(($action = post("action")) !== null) {
 		if(!in_array($values["emailInterval"], array("NEVER", "DAILY", "WEEKLY", "MONTHLY"))) {
 			$ladder_error .= formError("Invalid email interval.");
 		}
+		$values["newTemplateScore"] = post("newTemplateScore");
+		if (!in_array($values["newTemplateScore"], array("0", "1"))) {
+			$ladder_error .= formError("Invalid new template preference.");
+		}
 		foreach(db()->stdList("ladderTemplates", array("ladderID"=>$ladderID), "templateID") as $templateID) {
 			$score = post("template-" . $templateID);
 			if($score === null || $score = 0) {
@@ -176,6 +180,10 @@ $html .= operationForm("joinladder.php?ladder=$ladderID", $ladder_error, "Ladder
 		array("value"=>"MONTHLY", "label"=>"Every month"),
 	)),
 	array("title"=>"Preferred templates", "type"=>"rowspan", "name"=>"templates", "rows"=>$templates),
+	array("title"=>"When new templates are added to the ladder", "type"=>"dropdown", "name"=>"newTemplateScore", "options"=>array(
+		array("value"=>"1", "label"=>"Add them to my preferred templates"),
+		array("value"=>"0", "label"=>"Do not add them to my preferred templates"),
+	)),
 ), $ladder_values);
 
 page($html, "joinladder", "Join the ladder", "<a href=\"ladder.php?ladder=$ladderID\">$ladderNameHtml</a>", null, "Preferences");

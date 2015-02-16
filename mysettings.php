@@ -43,6 +43,10 @@ if(($action = post("action")) !== null) {
 		if(!in_array($values["emailInterval"], array("NEVER", "DAILY", "WEEKLY", "MONTHLY"))) {
 			$ladder_error .= formError("Invalid email interval.");
 		}
+		$values["newTemplateScore"] = post("newTemplateScore");
+		if (!in_array($values["newTemplateScore"], array("0", "1"))) {
+			$ladder_error .= formError("Invalid new template preference.");
+		}
 		$values["active"] = post("active");
 		if(!in_array($values["active"], array("0", "1"))) {
 			$ladder_error .= formError("Invalid currently playing value.");
@@ -96,7 +100,7 @@ if ($ladderID !== null) {
 	$ladderName = db()->stdGet("ladders", array("ladderID"=>$ladderID), "name");
 	$ladderNameHtml = htmlentities($ladderName);
 	
-	$ladder_values = db()->stdGet("ladderPlayers", array("userID"=>currentUserID(), "ladderID"=>$ladderID), array("simultaneousGames", "active", "emailInterval"));
+	$ladder_values = db()->stdGet("ladderPlayers", array("userID"=>currentUserID(), "ladderID"=>$ladderID), array("simultaneousGames", "newTemplateScore", "active", "emailInterval"));
 	
 	$ladderInfo = db()->stdGet("ladders", array("ladderID"=>$ladderID), array("minSimultaneousGames", "maxSimultaneousGames"));
 	
@@ -134,6 +138,10 @@ if ($ladderID !== null) {
 			array("value"=>"MONTHLY", "label"=>"Every month"),
 		)),
 		array("title"=>"Preferred templates", "type"=>"rowspan", "name"=>"templates", "rows"=>$templates),
+		array("title"=>"When new templates are added to the ladder", "type"=>"dropdown", "name"=>"newTemplateScore", "options"=>array(
+			array("value"=>"1", "label"=>"Add them to my preferred templates"),
+			array("value"=>"0", "label"=>"Do not add them to my preferred templates"),
+		)),
 		array("title"=>"Currently playing", "type"=>"dropdown", "name"=>"active", "options"=>array(
 			array("value"=>"1", "label"=>"Yes, create games for me."),
 			array("value"=>"0", "label"=>"No, do not create any further games. This will disable your rank until you resume playing.")
