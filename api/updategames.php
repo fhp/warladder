@@ -255,7 +255,7 @@ function createGames($ladderID)
 			$playerGameCounts[$userID] = array();
 		}
 		if (!isset($playerGameCounts[$userID][$player["simultaneousGames"]])) {
-			$timestamp = $player["joinTime"];
+			$timestamp = $player["joinTime"] - 7 * 86400;
 		} else {
 			$timestamp = $playerGameCounts[$userID][$player["simultaneousGames"]];
 		}
@@ -312,6 +312,9 @@ function createGames($ladderID)
 			} else {
 				$games = $playedGames[$userID1];
 			}
+			// HACK ALERT: the effective total number of games played is at least as large
+			// as the pool size. This guarantees a large memoryScore for new players.
+			$games = max($games, $players[$userID1]["poolSize"]);
 			$interveningGamesMatrix[$userID1][$userID2] = $games;
 		}
 	}
@@ -414,14 +417,13 @@ function createGames($ladderID)
 			return false;
 		}
 		
-		// The memory score is a score multiplier that drops if the players have recently played a game together.
 		if ($poolSize < 0.001) {
 			$memoryScore = 1.0;
 		} else {
 			$memoryScore = ((float)$interveningGames) / $poolSize;
 		}
 		
-		$happiness = log($quality, 2) + $memoryScore * 1.5 - 0.5;
+		$happiness = log($quality, 2) * 0.5 + $memoryScore * 1.5 - 0.5;
 		
 		$tolerance = $players[$userID1]["relativeMissedGameSeconds"] / 86400.0 * HAPPINESS_BITS_PER_DAY;
 		
