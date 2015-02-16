@@ -9,7 +9,6 @@ $html = "";
 
 $ladder = db()->stdGet("ladders", array("ladderID"=>$ladderID), array("name", "summary", "message"));
 
-$ladderNameHtml = htmlentities($ladder["name"]);
 $ladderMessageHtml = "<p>" . nl2br(htmlentities($ladder["message"])) . "</p>";
 
 if (!isLoggedIn() || !db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID, "userID"=>currentUserID()))) {
@@ -39,7 +38,7 @@ if(isLoggedIn() && db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID,
 	if ($player["joinStatus"] == "SIGNEDUP") {
 		$html .= <<<HTML
 <div class="alert alert-warning">
-<p>You must be approved by a ladder moderator before you can participate on $ladderNameHtml.</p>
+<p>You must be approved by a ladder moderator before you can participate on this ladder.</p>
 </div>
 
 HTML;
