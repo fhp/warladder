@@ -36,7 +36,7 @@ if(isLoggedIn() && db()->stdExists("ladderPlayers", array("ladderID"=>$ladderID,
 	$myRankingHtml = renderRanking($ladderID, "Your rank", "There don't seem to be any players on this ladder.", currentUserID(), max($player["rank"] - 6, 0), 10);
 	$myRecentGamesHtml = renderGames(currentUserID(), $ladderID, "Your recent games", "You have not played any games on this ladder yet.", 0, 10);
 	
-	if ($player["joinStatus"] == "signedUp") {
+	if ($player["joinStatus"] == "SIGNEDUP") {
 		$html .= <<<HTML
 <div class="alert alert-warning">
 <p>You must be approved by a ladder moderator before you can participate on $ladderNameHtml.</p>
