@@ -307,7 +307,12 @@ function createGames($ladderID)
 			if ($userID1 == $userID2) {
 				continue;
 			}
-			$interveningGamesMatrix[$userID1][$userID2] = $playedGames[$userID1];
+			if (!isset($playedGames[$userID1])) {
+				$games = 0;
+			} else {
+				$games = $playedGames[$userID1];
+			}
+			$interveningGamesMatrix[$userID1][$userID2] = $games;
 		}
 	}
 	/*
