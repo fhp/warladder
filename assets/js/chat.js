@@ -18,7 +18,11 @@ function LadderChat(ladderID)
 	
 	renderChat = function(lines) {
 		var tbody = $('#chatLines tbody');
-		scroll = tbody.scrollTop() + tbody.height() == tbody.prop("scrollHeight");
+		if(tbody.length == 0) {
+			scroll = true;
+		} else {
+			scroll = tbody.scrollTop() + tbody.height() == tbody.prop("scrollHeight");
+		}
 		
 		html = "";
 		$.each(lines, function(i, line) {
@@ -36,6 +40,7 @@ function LadderChat(ladderID)
 		}
 		
 		if(scroll) {
+			var tbody = $('#chatLines tbody');
 			tbody.scrollTop(tbody.prop("scrollHeight"));
 		}
 	}
