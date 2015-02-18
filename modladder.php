@@ -180,7 +180,7 @@ if (($removeTemplate = post("remove-template")) !== null) {
 			$templateID = db()->stdNew("ladderTemplates", array("ladderID"=>$ladderID, "warlightTemplateID"=>$warlightTemplateID, "name"=>$name));
 			$ladderIDSql = db()->addSlashes($ladderID);
 			$players = db()->query("
-				SELECT userID, warlightUserID
+				SELECT userID, warlightUserID, newTemplateScore
 				FROM ladderPlayers
 				LEFT JOIN users USING(userID)
 				WHERE ladderID = $ladderIDSql
@@ -188,7 +188,7 @@ if (($removeTemplate = post("remove-template")) !== null) {
 			foreach($players as $player) {
 				$result = apiGetUserTemplates($player["warlightUserID"], $warlightTemplateID);
 				$canPlay = in_array($warlightTemplateID, $result);
-				db()->stdNew("playerLadderTemplates", array("userID"=>$player["userID"], "ladderID"=>$ladderID, "templateID"=>$templateID, "score"=>1, "canPlay"=>$canPlay));
+				db()->stdNew("playerLadderTemplates", array("userID"=>$player["userID"], "ladderID"=>$ladderID, "templateID"=>$templateID, "score"=>$player["newTemplateScore"], "canPlay"=>$canPlay));
 			}
 		}
 	}

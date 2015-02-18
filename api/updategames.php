@@ -12,26 +12,41 @@ function finishGames($ladderID)
 	$runningGames = db()->stdList("ladderGames", array("ladderID"=>$ladderID, "status"=>"RUNNING"), array("gameID", "warlightGameID"));
 	foreach ($runningGames as $game) {
 		$status = apiGetGame($game["warlightGameID"]);
-		if (!$status["finished"]) {
+		if ($status["state"] == "playing") {
 			continue;
 		}
 		
-		$players = db()->stdList("gamePlayers", array("gameID"=>$game["gameID"]), "userID");
-		
-		if (count($status["winners"]) == 0) {
+		$doDelete = false;
+		$endTime = null;
+		if ($status["state"] == "rejected") {
+			$winner = null;
+			$doDelete = true;
+		} else if ($status["state"] == "votedtoend") {
 			$winner = null;
 		} else {
-			$winner = db()->stdGet("users", array("warlightUserID"=>$status["winners"][0]), "userID");
+			if (isset($status["winners"]) && count($status["winners"]) > 0) {
+				$winner = db()->stdGetTry("users", array("warlightUserID"=>$status["winners"][0]), "userID", null);
+			} else {
+				$winner = null;
+			}
+			$endTime = apiGetGameEndTime($game["warlightGameID"]);
 		}
 		
-		$endTime = apiGetGameEndTime($game["warlightGameID"]);
 		if ($endTime === null) {
 			// This can happen for turn-0 boots
 			$endTime = time();
 		}
 		
+		if ($doDelete) {
+			$success = apiDeleteGame($game["warlightGameID"]);
+			if (!$success) {
+				continue;
+			}
+		}
+		
 		db()->stdSet("ladderGames", array("gameID"=>$game["gameID"]), array("status"=>"FINISHED", "winningUserID"=>$winner, "endTime"=>$endTime));
 		
+		$players = db()->stdList("gamePlayers", array("gameID"=>$game["gameID"]), "userID");
 		$teams = array();
 		$rankings = array();
 		foreach ($players as $userID) {
@@ -43,7 +58,9 @@ function finishGames($ladderID)
 			}
 		}
 		
-		$results[] = array("teams"=>$teams, "rankings"=>$rankings);
+		if ($winner !== null) {
+			$results[] = array("teams"=>$teams, "rankings"=>$rankings);
+		}
 	}
 	
 	$players = db()->stdList("ladderPlayers", array("ladderID"=>$ladderID, "joinStatus"=>"JOINED", "active"=>1), array("userID", "mu", "sigma"));
@@ -238,7 +255,7 @@ function createGames($ladderID)
 			$playerGameCounts[$userID] = array();
 		}
 		if (!isset($playerGameCounts[$userID][$player["simultaneousGames"]])) {
-			$timestamp = $player["joinTime"];
+			$timestamp = $player["joinTime"] - 7 * 86400;
 		} else {
 			$timestamp = $playerGameCounts[$userID][$player["simultaneousGames"]];
 		}
@@ -290,7 +307,15 @@ function createGames($ladderID)
 			if ($userID1 == $userID2) {
 				continue;
 			}
-			$interveningGamesMatrix[$userID1][$userID2] = $playedGames[$userID1];
+			if (!isset($playedGames[$userID1])) {
+				$games = 0;
+			} else {
+				$games = $playedGames[$userID1];
+			}
+			// HACK ALERT: the effective total number of games played is at least as large
+			// as the pool size. This guarantees a large memoryScore for new players.
+			$games = max($games, $players[$userID1]["poolSize"]);
+			$interveningGamesMatrix[$userID1][$userID2] = $games;
 		}
 	}
 	/*
@@ -344,7 +369,7 @@ function createGames($ladderID)
 		LEFT JOIN gamePlayers ON lastGames.userID1 = gamePlayers.userID
 		LEFT JOIN ladderGames USING (gameID)
 		
-		WHERE (ladderGames.endTime IS NULL OR ladderGames.endTime >= lastGames.lastGameTime)
+		WHERE ladderGames.endTime > lastGames.lastGameTime
 		
 		GROUP BY userID1, userID2
 	")->fetchList();
@@ -392,14 +417,13 @@ function createGames($ladderID)
 			return false;
 		}
 		
-		// The memory score is a score multiplier that drops if the players have recently played a game together.
 		if ($poolSize < 0.001) {
 			$memoryScore = 1.0;
 		} else {
 			$memoryScore = ((float)$interveningGames) / $poolSize;
 		}
 		
-		$happiness = log($quality, 2) + $memoryScore;
+		$happiness = log($quality, 2) * 0.5 + $memoryScore * 1.5 - 0.5;
 		
 		$tolerance = $players[$userID1]["relativeMissedGameSeconds"] / 86400.0 * HAPPINESS_BITS_PER_DAY;
 		

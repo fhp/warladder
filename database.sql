@@ -106,6 +106,7 @@ CREATE TABLE IF NOT EXISTS `ladderPlayers` (
   `joinStatus` enum('JOINED','SIGNEDUP','REJECTED','BOOTED') NOT NULL,
   `active` tinyint(1) NOT NULL,
   `simultaneousGames` int(11) NOT NULL,
+  `newTemplateScore` int(11) NOT NULL,
   `joinTime` int(11) NOT NULL,
   `emailInterval` enum('NEVER','DAILY','WEEKLY','MONTHLY') NOT NULL,
   PRIMARY KEY (`userID`,`ladderID`),
