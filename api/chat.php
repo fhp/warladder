@@ -18,7 +18,7 @@ if($action == "get") {
 	}
 	$output = array();
 	foreach($result as $line) {
-		$output[] = array("userID"=>(int)$line["userID"], "name"=>$line["name"], "message"=>$line["message"], "timestamp"=>(int)$line["timestamp"]);
+		$output[] = array("userID"=>(int)$line["userID"], "name"=>$line["name"], "message"=>htmlentities($line["message"]), "timestamp"=>(int)$line["timestamp"]);
 	}
 	echo json_encode($output);
 	die();
@@ -26,14 +26,14 @@ if($action == "get") {
 	if(!isLoggedIn()) {
 		error404();
 	}
-	$message = get("message");
+	$message = post("message");
 	if($message === null || $message == "" || strlen($message) > 255) {
 		error404();
 	}
+	$message = urldecode($message);
 	db()->stdNew("ladderChat", array("ladderID"=>$ladderID, "userID"=>currentUserID(), "timestamp"=>time(), "message"=>$message));
 } else {
 	error404();
 }
-
 
 ?>

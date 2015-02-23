@@ -47,7 +47,7 @@ function LadderChat(ladderID)
 	
 	sendChat = function() {
 		line = $("#newChatLine").val();
-		$.get("api/chat.php?ladder=" + ladderID + "&action=send&message=" + line).done(updateChat);
+		$.post("api/chat.php?ladder=" + ladderID + "&action=send", "message=" + encodeURIComponent(line)).done(updateChat);
 		$("#newChatLine").val("");
 		return false;
 	}
