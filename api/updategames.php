@@ -198,7 +198,7 @@ function createGames($ladderID)
 		if (!isset($players[$userID])) {
 			continue;
 		}
-		if ($players[$userID]["simultaneousGames"] == $games) {
+		if ($players[$userID]["simultaneousGames"] <= $games) {
 			unset($players[$userID]);
 		} else {
 			$players[$userID]["activeGames"] = $games;
