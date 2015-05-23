@@ -49,6 +49,7 @@ function renderRanking($ladderID, $title, $emptyMessage, $highlightUserID, $from
 		. "FROM ladderPlayers INNER JOIN users USING(userID) "
 		. "WHERE ladderPlayers.ladderID = '$ladderIDSql' "
 		. "AND ladderPlayers.joinStatus = 'JOINED' "
+		. "AND rank > 0 "
 		. "ORDER BY rank ASC, userID ASC ";
 	
 	$render = function($player) use($ladderID, $highlightUserID) {
