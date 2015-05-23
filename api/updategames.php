@@ -12,6 +12,9 @@ function finishGames($ladderID)
 	$runningGames = db()->stdList("ladderGames", array("ladderID"=>$ladderID, "status"=>"RUNNING"), array("gameID", "warlightGameID"));
 	foreach ($runningGames as $game) {
 		$status = apiGetGame($game["warlightGameID"]);
+		if ($status === null) {
+			continue;
+		}
 		if ($status["state"] == "playing") {
 			continue;
 		}
@@ -30,10 +33,17 @@ function finishGames($ladderID)
 				$winner = null;
 			}
 			$endTime = apiGetGameEndTime($game["warlightGameID"]);
+			if ($endTime === null) {
+				continue;
+			} else if ($endTime === false) {
+				continue;
+			} else if ($endTime === true) {
+				// turn-0 boot
+				$endTime = null;
+			}
 		}
 		
 		if ($endTime === null) {
-			// This can happen for turn-0 boots
 			$endTime = time();
 		}
 		
